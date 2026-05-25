@@ -17,6 +17,16 @@
 
 This spec describes the **initial release scope (v0.1 through v0.5)** — what must ship for undevops to be both (a) a credible Dokploy alternative for solo developers and small teams, and (b) the only deployment platform where AI agents are first-class operators rather than read-only spectators.
 
+## Clarifications
+
+### Session 2026-05-25
+
+- Q: Controller availability target for v0.x → A: Single-instance, RTO ~30 minutes via documented backup-restore procedure. High-availability (active-passive / active-active) is explicitly out of scope for v0.x and reserved for a potential future enterprise tier.
+- Q: Scale envelope (v0.x design bounds) → A: 50 servers per cluster, 500 projects per administrator, 30 replicas per deployment, 30-day audit/log retention. These are design targets — undevops MUST function correctly within them. Above these, behavior is undefined for v0.x and explicitly out of scope.
+- Q: MCP token lifecycle → A: Long-lived bearer tokens. Manual rotation by admin (no auto-rotation). Admin can revoke any token at any time, taking immediate effect on the next request. Scope = (access-level: read / write / exec) × (target: per-project or all-projects). No OAuth2 consent flow; no short-lived/refresh-token flow in v0.x.
+- Q: Multi-AI review tie-break policy → A: Strict by default — any single FAIL verdict blocks the deploy. A reviewer that does not respond within the configured timeout is treated as ABSENT, and ABSENT counts as FAIL for gate evaluation. Override requires an administrator to record a written reason; the override is logged. This default mirrors constitution Principle VI's cross-AI review gate semantics.
+- Q: Backup / restore strategy for control plane → A: Built-in scheduled backup to administrator-configured S3-compatible object storage (any compliant provider — AWS S3, Backblaze B2, Cloudflare R2, MinIO, etc.). Restore procedure = fresh undevops install + documented restore command. Continuous replication and managed cloud backup are out of scope for v0.x.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 — Solo Developer Deploys Their First Project (Priority: P1)
@@ -122,11 +132,12 @@ A growing team outgrows a single VPS. They add a second and third server to unde
 
 ### Edge Cases
 
-- **AI reviewer outage during gated deploy**: undevops marks the reviewer ABSTAIN, applies the configured outage policy (proceed / block / require human), and surfaces the outage in the UI
+- **AI reviewer outage during gated deploy**: undevops marks the reviewer ABSENT after the per-reviewer timeout expires. Under the default strict policy, ABSENT counts as FAIL and blocks the deploy until an administrator overrides with a written reason. The outage is surfaced prominently in the UI so the administrator can distinguish "reviewer disagreed" from "reviewer was unreachable"
 - **MCP-initiated action conflicts with a human-initiated action on the same resource**: the second action queues behind the first; if optimistic concurrency is violated, the queued action returns a conflict error to the agent
 - **Secrets in AI context**: under no condition do secret values appear in MCP responses, AI reviewer payloads, or audit log free-text fields. Secret keys may be referenced; values are always redacted upstream of the AI boundary
 - **Plugin crashes during a deployment hook**: the deployment continues; the plugin is marked faulted; subsequent invocations are suppressed until the user re-enables it; the fault is recorded for `/learn`-style analysis
-- **undevops self-recovery after a host crash**: on startup, undevops reconciles its internal state with running Docker containers and external Let's Encrypt certificate state. It does NOT automatically re-deploy applications that were running before the crash unless explicitly configured to do so
+- **undevops self-recovery after a host crash**: on startup, undevops reconciles its internal state with running containers and external certificate state. It does NOT automatically re-deploy applications that were running before the crash unless explicitly configured to do so. Full restoration of the undevops controller itself from a documented backup MUST achievable within an RTO of approximately 30 minutes by a single administrator following the documented procedure
+- **undevops controller is single-instance in v0.x**: there is no built-in high-availability for the undevops control plane. The control plane being temporarily unavailable does NOT take down already-running deployed applications — they continue serving traffic via the reverse proxy independently of the control plane's liveness
 - **License attribution**: every distributed artifact (Docker image, npm package, binary) preserves the Dokploy upstream attribution as required by Apache 2.0
 - **Windows development environment**: undevops runs on Linux servers but its source code, build tooling, and CLI MUST work on Windows hosts. Bash-only scripts are an anti-pattern
 - **Open-core readiness check**: the `packages/core` build MUST succeed without `packages/enterprise` or `packages/ai-pack` present in the working tree. A CI gate verifies this on every PR
@@ -156,7 +167,9 @@ A growing team outgrows a single VPS. They add a second and third server to unde
 **MCP Gateway — Read (P1)**:
 - **FR-011**: System MUST expose an MCP server that publishes servers, projects, deployments, logs, and recent events as MCP resources
 - **FR-012**: MCP responses MUST redact secret values before transmission
-- **FR-013**: MCP access MUST be governed by per-client tokens with scoped permissions (read-only, read/write, per-project)
+- **FR-013**: MCP access MUST be governed by per-client long-lived bearer tokens. Each token's scope is the cross-product of (access-level: `read` / `write` / `exec`) and (target: a specific project or all-projects). Tokens are issued by an administrator and do not expire automatically
+- **FR-013a**: An administrator MUST be able to revoke any MCP token at any time. Revocation MUST take effect on the next request from that token, with a structured rejection response
+- **FR-013b**: An administrator MUST be able to view, for each token: name, scope, creation timestamp, last-used timestamp, and the count of requests since creation, to support manual rotation decisions
 - **FR-014**: All MCP requests MUST be recorded in the audit log with the initiating client identifier
 
 **Plugin System (P2)**:
@@ -174,8 +187,9 @@ A growing team outgrows a single VPS. They add a second and third server to unde
 **Multi-AI Pre-Deploy Review (P3)**:
 - **FR-023**: System MUST allow an environment (e.g. "production") to be configured with N AI reviewers, where each reviewer is identified by provider + credential reference
 - **FR-024**: When a deploy is triggered against a gated environment, the system MUST submit the change payload (diff, env changes, compose changes) to each configured reviewer and wait for verdicts
-- **FR-025**: The deploy MUST be blocked until either (a) the configured pass criteria are met, or (b) a human explicitly overrides with a written reason recorded to the audit log
-- **FR-026**: Reviewer responses MUST be persisted and viewable per-deployment for retrospective analysis
+- **FR-025**: The deploy MUST be blocked until either (a) every configured reviewer returned a PASS verdict, or (b) a human administrator explicitly overrides with a written reason recorded to the audit log. The default policy is **strict**: any single FAIL or ABSENT (timeout) verdict blocks the deploy. This default MAY be relaxed per-environment via configuration, but the strict policy is what ships by default
+- **FR-025a**: A reviewer that does not respond within the configured per-reviewer timeout MUST be treated as ABSENT. Under the default strict policy, ABSENT counts as FAIL for gate evaluation
+- **FR-026**: Reviewer responses (verdict, concerns, timestamps) MUST be persisted and viewable per-deployment for retrospective analysis
 
 **Multi-Server Cluster (P3)**:
 - **FR-027**: System MUST support adding multiple servers and treating them as a single deployment cluster
@@ -188,6 +202,13 @@ A growing team outgrows a single VPS. They add a second and third server to unde
 - **FR-032**: System MUST be developable on Windows, macOS, and Linux developer hosts. Build and developer scripts MUST work on all three host platforms without manual translation
 - **FR-033**: System MUST surface its own version, the upstream project version it was forked from, and the list of loaded plugins via both an HTTP endpoint and MCP
 - **FR-034**: System MUST follow the `underhelpers` SpecKit constitution for its own development (Principles I–VIII), including the cross-AI review gate for any change to spec/plan/tasks artifacts
+
+**Backup & Restore (P2)**:
+- **FR-035**: System MUST take periodic backups of its own state (project definitions, server registrations, secrets, audit log, MCP tokens, plugin manifests, deployment history) on an administrator-configured schedule. The default schedule is every 6 hours
+- **FR-036**: Backups MUST be written to administrator-configured S3-compatible object storage. The administrator supplies the endpoint, bucket, credentials, and optional path prefix. No backup target is assumed by default — backups are inactive until configured
+- **FR-037**: Backups MUST be encrypted at rest with an administrator-controlled key. The restore procedure MUST require the same key
+- **FR-038**: System MUST surface backup status (last successful backup timestamp, last attempted backup timestamp, last error if any) in the UI and via MCP
+- **FR-039**: A documented restore command MUST exist that takes a backup archive (downloaded from object storage by the administrator) and a fresh undevops install, and restores the control-plane state to the moment of that backup
 
 ### Key Entities
 
@@ -210,6 +231,7 @@ A growing team outgrows a single VPS. They add a second and third server to unde
 - **AI provider availability**: pre-deploy review and MCP-driven workflows depend on external AI providers (Claude, Gemini, Codex, etc.). Provider outages degrade those features (per outage policy) but MUST NOT break baseline deployment
 - **Single-administrator model in v0.1**: the initial release assumes one human administrator. Multi-user, SSO, and RBAC are explicit non-goals for v0.x but the auth layer is architected as a pluggable boundary for later expansion
 - **License compliance**: by forking under Apache 2.0, undevops is obligated to preserve upstream copyright notices and license text in every distributed artifact. This is a hard requirement, not a preference
+- **Scale envelope (v0.x design bounds)**: a single undevops instance is designed to handle up to 50 connected servers, up to 500 projects per administrator, up to 30 replicas per deployment, and 30 days of audit/log retention. Behavior above these bounds is undefined for v0.x. Raising them is a v0.y concern that requires explicit re-design of indexing, archival, and pagination
 
 ## Out of Scope (for v0.x)
 
@@ -242,3 +264,6 @@ These deferred items are listed here so reviewers and contributors can quickly d
 - **SC-008**: No secret value appears in any MCP response, AI reviewer payload, audit log free-text field, or application log in automated scanning of a representative test workload
 - **SC-009**: The development environment installs and runs the full test suite successfully on current Windows, macOS, and mainstream Linux developer hosts from a single documented setup procedure
 - **SC-010**: An agent-initiated `deploy` action issued via MCP is observable end-to-end (request received → approval gate → execution → completion notification to the agent) with structured progress events at each transition
+- **SC-011**: From a verified backup, a single administrator can restore the undevops control plane to a working state on a fresh host within 30 minutes, following only the public recovery documentation. Deployed applications continue serving traffic during the control-plane outage
+- **SC-012**: At the documented scale envelope (50 servers, 500 projects, 30-day log retention populated to capacity), all P1 operations meet their performance targets (e.g. SC-002 MCP read p95 under 500ms), and no operation degrades non-linearly
+- **SC-013**: With backups configured to a working S3-compatible target, the most recent successful backup is no more than 6 hours old at any time, and the surfaced last-backup-timestamp reflects this within 1 minute of completion
