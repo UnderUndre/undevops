@@ -63,3 +63,15 @@ export {
   type OverrideRequest,
   type OverrideResult,
 } from "./admin-override";
+
+export {
+  identifyRescheduleCandidates,
+  drainNodeAndReschedule,
+  type RescheduleAction,
+} from "./replica-rescheduler";
+
+export {
+  calculatePlacement,
+  buildSpreadPlacementPreference,
+  scheduleReplicasForApplication,
+} from "./replica-scheduler";

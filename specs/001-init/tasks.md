@@ -259,15 +259,15 @@
 
 ### Implementation for US6
 
-- [ ] T115 [BE] [US6] Preserve and verify Dokploy's Docker Swarm integration under `@undevops/*` package names in `packages/core/src/deploy/`
-- [ ] T116 [BE] [US6] Implement multi-node replica scheduling: distribute replicas across distinct nodes when `replicas > 1` in `packages/core/src/deploy/` per FR-028
-- [ ] T117 [BE] [US6] Implement node health monitoring: periodic check (BullMQ scheduled job), mark degraded/unreachable in `packages/core/src/server-mgmt/` per FR-029
-- [ ] T118 [BE] [US6] Implement replica rescheduling: drain from degraded nodes within configurable timeout, reschedule to healthy nodes in `packages/core/src/deploy/` per FR-029
-- [ ] T119 [BE] [US6] Update Traefik config for multi-node load balancing: distribute traffic across healthy replicas in `packages/core/src/proxy/`
-- [ ] T120 [FE] [US6] Add cluster topology view in web UI: nodes, health, replica placement, resource utilization in `apps/web/src/components/`
-- [ ] T121 [E2E] [US6] Integration test: 3 servers → deploy 3 replicas → verify distribution across distinct nodes (acceptance scenario 1, FR-028)
-- [ ] T122 [E2E] [US6] Integration test: kill 1 node → replicas reschedule → service continues via load balancer (acceptance scenario 2, FR-029)
-- [ ] T123 [E2E] [US6] Integration test: node rejoins → eligible for next deployment placement (acceptance scenario 3)
+- [X] T115 [BE] [US6] Preserve and verify Dokploy's Docker Swarm integration under `@undevops/*` package names in `packages/core/src/deploy/`
+- [X] T116 [BE] [US6] Implement multi-node replica scheduling: distribute replicas across distinct nodes when `replicas > 1` in `packages/core/src/deploy/` per FR-028
+- [X] T117 [BE] [US6] Implement node health monitoring: periodic check (BullMQ scheduled job), mark degraded/unreachable in `packages/core/src/server-mgmt/` per FR-029
+- [X] T118 [BE] [US6] Implement replica rescheduling: drain from degraded nodes within configurable timeout, reschedule to healthy nodes in `packages/core/src/deploy/` per FR-029
+- [X] T119 [BE] [US6] Update Traefik config for multi-node load balancing: distribute traffic across healthy replicas in `packages/core/src/proxy/`
+- [X] T120 [FE] [US6] Add cluster topology view in web UI: nodes, health, replica placement, resource utilization in `apps/web/src/components/`
+- [X] T121 [E2E] [US6] Integration test: 3 servers → deploy 3 replicas → verify distribution across distinct nodes (acceptance scenario 1, FR-028)
+- [X] T122 [E2E] [US6] Integration test: kill 1 node → replicas reschedule → service continues via load balancer (acceptance scenario 2, FR-029)
+- [X] T123 [E2E] [US6] Integration test: node rejoins → eligible for next deployment placement (acceptance scenario 3)
 
 **Checkpoint**: All 6 user stories should be independently testable
 
