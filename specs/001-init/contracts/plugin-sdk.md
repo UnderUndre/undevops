@@ -990,28 +990,29 @@ export default class SlackNotifyPlugin implements UndevopsPlugin {
 
 ## Database Schema
 
-### `plugins` table
+### `plugin` table
+
+> **Note**: The canonical schema is defined in `data-model.md` (Drizzle ORM). The SQL below is kept in sync for reference.
 
 ```sql
-CREATE TABLE plugins (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(64) NOT NULL UNIQUE,
-  version VARCHAR(32) NOT NULL,
-  description TEXT,
-  author VARCHAR(128),
-  status VARCHAR(16) NOT NULL DEFAULT 'active'
-    CHECK (status IN ('active', 'faulted', 'disabled', 'failed')),
-  manifest JSONB NOT NULL,
-  granted_permissions TEXT[] NOT NULL DEFAULT '{}',
-  settings JSONB NOT NULL DEFAULT '{}',
-  fault_count INTEGER NOT NULL DEFAULT 0,
-  last_fault_at TIMESTAMPTZ,
-  last_fault_message TEXT,
-  loaded_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+CREATE TABLE "plugin" (
+  "pluginId" text NOT NULL PRIMARY KEY DEFAULT nanoid(),
+  "name" text NOT NULL UNIQUE,
+  "version" text NOT NULL,
+  "manifestJson" jsonb NOT NULL,
+  "grantedPermissions" text[] NOT NULL DEFAULT '{}',
+  "enabled" boolean NOT NULL DEFAULT true,
+  "faulted" boolean NOT NULL DEFAULT false,
+  "faultMessage" text,
+  "hookSubscriptions" text[] NOT NULL DEFAULT '{}',
+  "organizationId" text NOT NULL REFERENCES "organization"("id") ON DELETE CASCADE,
+  "installedBy" text REFERENCES "user"("id") ON DELETE SET NULL,
+  "installed_at" timestamp NOT NULL DEFAULT NOW(),
+  "updated_at" timestamp,
+  "last_invoked_at" timestamp,
+  "invoke_count" integer NOT NULL DEFAULT 0
 );
 
-CREATE INDEX idx_plugins_status ON plugins(status);
-CREATE INDEX idx_plugins_name ON plugins(name);
+CREATE INDEX "plugin_organizationId_idx" ON "plugin"("organizationId");
+CREATE INDEX "plugin_enabled_idx" ON "plugin"("enabled") WHERE "enabled" = true;
 ```

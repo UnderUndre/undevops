@@ -92,6 +92,9 @@ If you prefer manual setup or the installer doesn't work for your distro:
 git clone https://github.com/undevops/undevops.git /opt/undevops
 cd /opt/undevops
 
+# Generate an encryption key
+openssl rand -hex 32
+
 # Copy the example environment file
 cp .env.example .env
 
@@ -101,17 +104,14 @@ cp .env.example .env
 #   LETSENCRYPT_EMAIL
 nano .env
 
-# Generate an encryption key
-openssl rand -hex 32
-
 # Start services
 docker compose up -d
 
 # Run database migrations
-docker compose exec server npx undevops db:migrate
+docker compose exec undevops-server npx undevops db:migrate
 
 # Create admin user
-docker compose exec server npx undevops user:create \
+docker compose exec undevops-server npx undevops user:create \
   --email "admin@yourdomain.com" \
   --password "your-secure-password"
 ```
@@ -570,7 +570,7 @@ docker compose restart
 
 ```bash
 # Verify SSH connectivity from the undevops container
-docker compose exec server undevops servers test-connection <server-name>
+docker compose exec undevops-server undevops servers test-connection <server-name>
 
 # Common issues:
 # - SSH key not added to server's authorized_keys
@@ -611,7 +611,7 @@ docker compose restart
 ### Reset admin password
 
 ```bash
-docker compose exec server npx undevops user:reset-password \
+docker compose exec undevops-server npx undevops user:reset-password \
   --email "admin@yourdomain.com" \
   --password "new-secure-password"
 ```

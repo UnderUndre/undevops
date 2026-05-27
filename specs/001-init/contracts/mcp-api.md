@@ -1090,6 +1090,7 @@ Redaction is applied at the MCP server layer before any response leaves the serv
 - Secondary transport for remote/integrated environments
 - Endpoint: `GET /sse` for event stream, `POST /messages` for client requests
 - Requires `Authorization: Bearer <token>` header on both endpoints
+- Browser `EventSource` fallback: `GET /sse?token=<token>` — query parameter accepted when header cannot be set (e.g. browser-native `EventSource`). Token is not logged in server access logs.
 - Heartbeat every 30 seconds
 - Connection timeout: 5 minutes of inactivity → server closes
 

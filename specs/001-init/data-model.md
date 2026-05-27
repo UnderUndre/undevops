@@ -303,7 +303,6 @@ export const mcpClients = pgTable("mcp_client", {
     .notNull()
     .references(() => organization.id, { onDelete: "cascade" }),
   createdBy: text("createdBy")
-    .notNull()
     .references(() => user.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   lastUsedAt: timestamp("last_used_at"),
@@ -323,7 +322,7 @@ export const mcpClients = pgTable("mcp_client", {
 | targetId | text | YES | | Optional scoping to specific project/environment/service |
 | targetType | mcpTargetType (pgEnum) | YES | | What targetId refers to |
 | organizationId | text (FK → organization.id) | NO | | CASCADE |
-| createdBy | text (FK → user.id) | NO | | SET NULL (preserve audit if user deleted) |
+| createdBy | text (FK → user.id) | YES | | SET NULL (preserve audit if user deleted) |
 | createdAt | timestamp | NO | defaultNow() | |
 | lastUsedAt | timestamp | YES | | Updated on each authenticated request |
 | requestCount | integer | NO | 0 | Monotonically increasing request counter |
@@ -400,7 +399,6 @@ export const plugins = pgTable("plugin", {
     .notNull()
     .references(() => organization.id, { onDelete: "cascade" }),
   installedBy: text("installedBy")
-    .notNull()
     .references(() => user.id, { onDelete: "set null" }),
   installedAt: timestamp("installed_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
@@ -421,7 +419,7 @@ export const plugins = pgTable("plugin", {
 | faultMessage | text | YES | | Last error message when faulted |
 | hookSubscriptions | text[] | NO | `{}` | Hook names this plugin subscribes to |
 | organizationId | text (FK → organization.id) | NO | | CASCADE |
-| installedBy | text (FK → user.id) | NO | | SET NULL |
+| installedBy | text (FK → user.id) | YES | | SET NULL |
 | installedAt | timestamp | NO | defaultNow() | |
 | updatedAt | timestamp | YES | on update | |
 | lastInvokedAt | timestamp | YES | | Updated on each hook invocation |
@@ -497,7 +495,6 @@ export const aiReviewers = pgTable("ai_reviewer", {
     .notNull()
     .references(() => organization.id, { onDelete: "cascade" }),
   createdBy: text("createdBy")
-    .notNull()
     .references(() => user.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
@@ -518,7 +515,7 @@ export const aiReviewers = pgTable("ai_reviewer", {
 | timeoutSeconds | integer | NO | 30 | Per-reviewer timeout (FR-021) |
 | isEnabled | boolean | NO | true | |
 | organizationId | text (FK → organization.id) | NO | | CASCADE |
-| createdBy | text (FK → user.id) | NO | | SET NULL |
+| createdBy | text (FK → user.id) | YES | | SET NULL |
 | createdAt | timestamp | NO | defaultNow() | |
 | updatedAt | timestamp | YES | on update | |
 | lastInvokedAt | timestamp | YES | | |
@@ -593,7 +590,6 @@ export const secrets = pgTable("secret", {
     .notNull()
     .references(() => organization.id, { onDelete: "cascade" }),
   createdBy: text("createdBy")
-    .notNull()
     .references(() => user.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   lastRotatedAt: timestamp("last_rotated_at"),
@@ -613,7 +609,7 @@ export const secrets = pgTable("secret", {
 | description | text | YES | | Human-readable note |
 | version | integer | NO | 1 | Incremented on each rotation |
 | organizationId | text (FK → organization.id) | NO | | CASCADE |
-| createdBy | text (FK → user.id) | NO | | SET NULL |
+| createdBy | text (FK → user.id) | YES | | SET NULL |
 | createdAt | timestamp | NO | defaultNow() | |
 | lastRotatedAt | timestamp | YES | | Set on each rotation |
 | expiresAt | timestamp | YES | | Optional auto-expiry |
@@ -902,7 +898,7 @@ CREATE TABLE "mcp_client" (
   "targetId" text,
   "targetType" "mcpTargetType",
   "organizationId" text NOT NULL REFERENCES "organization"("id") ON DELETE CASCADE,
-  "createdBy" text NOT NULL REFERENCES "user"("id") ON DELETE SET NULL,
+  "createdBy" text REFERENCES "user"("id") ON DELETE SET NULL,
   "created_at" timestamp NOT NULL DEFAULT NOW(),
   "last_used_at" timestamp,
   "request_count" integer NOT NULL DEFAULT 0,
@@ -929,7 +925,7 @@ CREATE TABLE "plugin" (
   "faultMessage" text,
   "hookSubscriptions" text[] NOT NULL DEFAULT '{}',
   "organizationId" text NOT NULL REFERENCES "organization"("id") ON DELETE CASCADE,
-  "installedBy" text NOT NULL REFERENCES "user"("id") ON DELETE SET NULL,
+  "installedBy" text REFERENCES "user"("id") ON DELETE SET NULL,
   "installed_at" timestamp NOT NULL DEFAULT NOW(),
   "updated_at" timestamp,
   "last_invoked_at" timestamp,
@@ -957,7 +953,7 @@ CREATE TABLE "ai_reviewer" (
   "timeout_seconds" integer NOT NULL DEFAULT 30,
   "isEnabled" boolean NOT NULL DEFAULT true,
   "organizationId" text NOT NULL REFERENCES "organization"("id") ON DELETE CASCADE,
-  "createdBy" text NOT NULL REFERENCES "user"("id") ON DELETE SET NULL,
+  "createdBy" text REFERENCES "user"("id") ON DELETE SET NULL,
   "created_at" timestamp NOT NULL DEFAULT NOW(),
   "updated_at" timestamp,
   "last_invoked_at" timestamp,
@@ -1027,7 +1023,7 @@ CREATE TABLE "secret" (
   "description" text,
   "version" integer NOT NULL DEFAULT 1,
   "organizationId" text NOT NULL REFERENCES "organization"("id") ON DELETE CASCADE,
-  "createdBy" text NOT NULL REFERENCES "user"("id") ON DELETE SET NULL,
+  "createdBy" text REFERENCES "user"("id") ON DELETE SET NULL,
   "created_at" timestamp NOT NULL DEFAULT NOW(),
   "last_rotated_at" timestamp,
   "expires_at" timestamp
