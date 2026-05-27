@@ -18,3 +18,4 @@ export * as redaction from "./redaction.js";
 export * as transport from "./transport/index.js";
 export * as resources from "./resources/index.js";
 export * as middleware from "./middleware/index.js";
+export * as tools from "./tools/index.js";

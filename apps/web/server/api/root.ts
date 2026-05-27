@@ -5,6 +5,7 @@ import { applicationRouter } from "./routers/application";
 import { backupRouter } from "./routers/backup";
 import { bitbucketRouter } from "./routers/bitbucket";
 import { mcpTokenRouter } from "./routers/mcp-token";
+import { pendingActionRouter } from "./routers/pending-action";
 import { certificateRouter } from "./routers/certificate";
 import { clusterRouter } from "./routers/cluster";
 import { composeRouter } from "./routers/compose";
@@ -76,6 +77,7 @@ export const appRouter = createTRPCRouter({
 	mariadb: mariadbRouter,
 	mongo: mongoRouter,
 	mcpToken: mcpTokenRouter,
+	pendingAction: pendingActionRouter,
 	mounts: mountRouter,
 	mysql: mysqlRouter,
 	notification: notificationRouter,

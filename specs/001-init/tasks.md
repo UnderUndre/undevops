@@ -205,18 +205,18 @@
 
 ### Implementation for US4
 
-- [ ] T086 [BE] [US4] Implement `undevops_deploy` MCP tool: validate write scope, create deployment + pending agent action in `apps/mcp-server/src/tools/` per contracts/mcp-api.md
-- [ ] T087 [BE] [US4] Implement `undevops_rollback` MCP tool: validate write scope, create rollback + pending action in `apps/mcp-server/src/tools/`
-- [ ] T088 [BE] [US4] Implement `undevops_scale` MCP tool: validate exec scope, create scale action in `apps/mcp-server/src/tools/`
-- [ ] T089 [BE] [US4] Implement `undevops_inspect_deployment` and `undevops_get_logs` MCP tools for read-scope tool-oriented workflows in `apps/mcp-server/src/tools/`
-- [ ] T090 [BE] [US4] Implement pending action queue: store in `pending_agent_actions` table, surface in web UI via tRPC endpoint, auto-expire via `expires_at`
-- [ ] T091 [BE] [US4] Implement approval flow: human approves/rejects in UI → action executes → result recorded in audit log with `actor_type: "agent"` (FR-021, FR-022)
-- [ ] T092 [BE] [US4] Implement auto-approval policy: configurable per environment (`autoApproveAgents` flag), off by default
-- [ ] T093 [BE] [US4] Implement action progress subscription: agent polls or receives SSE events for deployment status (queued → building → deploying → healthy/failed)
-- [ ] T094 [BE] [US4] Implement optimistic concurrency: second action on same resource queues; if race detected, return conflict error `-32004`
-- [ ] T095 [FE] [US4] Add pending agent actions page in web UI: list pending, approve/reject with optional note, view linked deployment in `apps/web/src/components/`
-- [ ] T096 [E2E] [US4] Integration test: MCP write client → deploy → approve → verify completion + audit log (acceptance scenarios 1–4, SC-010)
-- [ ] T097 [E2E] [US4] Integration test: write client out of scope → immediate rejection, no pending state, rejection logged (FR-020)
+- [X] T086 [BE] [US4] Implement `undevops_deploy` MCP tool: validate write scope, create deployment + pending agent action in `apps/mcp-server/src/tools/` per contracts/mcp-api.md
+- [X] T087 [BE] [US4] Implement `undevops_rollback` MCP tool: validate write scope, create rollback + pending action in `apps/mcp-server/src/tools/`
+- [X] T088 [BE] [US4] Implement `undevops_scale` MCP tool: validate exec scope, create scale action in `apps/mcp-server/src/tools/`
+- [X] T089 [BE] [US4] Implement `undevops_inspect_deployment` and `undevops_get_logs` MCP tools for read-scope tool-oriented workflows in `apps/mcp-server/src/tools/`
+- [X] T090 [BE] [US4] Implement pending action queue: store in `pending_agent_actions` table, surface in web UI via tRPC endpoint, auto-expire via `expires_at`
+- [X] T091 [BE] [US4] Implement approval flow: human approves/rejects in UI → action executes → result recorded in audit log with `actor_type: "agent"` (FR-021, FR-022)
+- [X] T092 [BE] [US4] Implement auto-approval policy: configurable per environment (`autoApproveAgents` flag), off by default
+- [X] T093 [BE] [US4] Implement action progress subscription: agent polls or receives SSE events for deployment status (queued → building → deploying → healthy/failed)
+- [X] T094 [BE] [US4] Implement optimistic concurrency: second action on same resource queues; if race detected, return conflict error `-32004`
+- [X] T095 [FE] [US4] Add pending agent actions page in web UI: list pending, approve/reject with optional note, view linked deployment in `apps/web/src/components/`
+- [X] T096 [E2E] [US4] Integration test: MCP write client → deploy → approve → verify completion + audit log (acceptance scenarios 1–4, SC-010)
+- [X] T097 [E2E] [US4] Integration test: write client out of scope → immediate rejection, no pending state, rejection logged (FR-020)
 
 **Checkpoint**: User Stories 1–4 should all work independently
 
