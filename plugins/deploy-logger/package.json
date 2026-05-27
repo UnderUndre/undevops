@@ -1,0 +1,10 @@
+{
+  "name": "@undevops/plugin-deploy-logger",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./index.ts",
+  "peerDependencies": {
+    "@undevops/plugin-sdk": "workspace:*"
+  }
+}

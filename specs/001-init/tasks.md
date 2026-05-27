@@ -177,21 +177,21 @@
 
 ### Implementation for US3
 
-- [ ] T071 [BE] [US3] Define `undevops-plugin.json` manifest schema (Zod validation) in `packages/plugin-sdk/src/types/` per contracts/plugin-sdk.md §Plugin Manifest
-- [ ] T072 [BE] [US3] Define typed hook payloads: `PreDeployPayload`, `PostDeployPayload`, `DeployFailedPayload`, `ServerAddedPayload`, `ServerRemovedPayload`, `ProjectCreatedPayload`, `ProjectDeletedPayload` in `packages/plugin-sdk/src/types/` per contracts/plugin-sdk.md
-- [ ] T073 [BE] [US3] Implement plugin loader in `packages/plugin-sdk/src/host/`: scan directory, validate manifests (Zod), load modules (dynamic import), check SDK version compatibility. Plugins run in-process via dynamic import() — this gives them full Node.js runtime access. Permission system is a UX/administrative boundary, not security sandbox. Document this honestly in plugin-sdk README. Future: investigate Worker threads or subprocess isolation for untrusted plugins.
-- [ ] T074 [BE] [US3] Implement hook dispatcher in `packages/plugin-sdk/src/host/`: ordered invocation by priority, error isolation per hook, timeout enforcement, faulted-state tracking (FR-018). Implement crash-loop prevention: track fault count + timestamps per plugin. When plugin faults ≥3 times within rolling 10-minute window, auto-set status='disabled', audit-log auto-disable, and skip subsequent invocations until admin re-enables. Fault counter resets only on explicit re-enable.
-- [ ] T075 [BE] [US3] Implement permission system in `packages/plugin-sdk/src/permissions/`: declare in manifest, prompt on install, grant/deny persist to `plugins.grantedPermissions`, runtime enforcement on `PluginApiClient`
-- [ ] T076 [BE] [US3] Implement `PluginApiClient` in `packages/plugin-sdk/src/`: scoped, permission-checked API with rate limiting (30 req/min) and timeout (5s)
-- [ ] T077 [BE] [US3] Implement plugin test utilities: `createTestContext`, `mockPayload` builders in `packages/plugin-sdk/src/testing.ts` per contracts/plugin-sdk.md §Testing Support
-- [ ] T078 [BE] [US3] Write reference plugin: "log every deployment event to stdout" in `plugins/deploy-logger/` with manifest, hook implementation, and package.json
-- [ ] T079 [BE] [US3] Integrate plugin host into deployment pipeline: fire `pre-deploy`, `post-deploy`, `deploy-failed` hooks in `packages/core/src/deploy/`
-- [ ] T080 [BE] [US3] Integrate plugin host into server/project lifecycle: fire `server-added`, `server-removed`, `project-created`, `project-deleted` hooks in `packages/core/src/server-mgmt/` and project services
-- [ ] T081 [BE] [US3] Implement plugin install/list/enable/disable/remove CLI commands in `apps/cli/src/commands/plugins.ts`
-- [ ] T082 [FE] [US3] Add plugin management page to web UI: list plugins, status (active/faulted/disabled/failed), permissions, last invoked, enable/disable in `apps/web/src/components/`
-- [ ] T083 [E2E] [US3] Integration test: install reference plugin → trigger deploy → verify hook fires (acceptance scenarios 1–2, SC-003)
-- [ ] T084 [E2E] [US3] Integration test: plugin throws in hook → verify deployment continues, plugin marked faulted (FR-018, acceptance scenario 3)
-- [ ] T085 [E2E] [US3] Integration test: plugin declares permission → user prompted to grant/deny → recorded (FR-019, acceptance scenario 4)
+- [X] T071 [BE] [US3] Define `undevops-plugin.json` manifest schema (Zod validation) in `packages/plugin-sdk/src/types/` per contracts/plugin-sdk.md §Plugin Manifest
+- [X] T072 [BE] [US3] Define typed hook payloads: `PreDeployPayload`, `PostDeployPayload`, `DeployFailedPayload`, `ServerAddedPayload`, `ServerRemovedPayload`, `ProjectCreatedPayload`, `ProjectDeletedPayload` in `packages/plugin-sdk/src/types/` per contracts/plugin-sdk.md
+- [X] T073 [BE] [US3] Implement plugin loader in `packages/plugin-sdk/src/host/`: scan directory, validate manifests (Zod), load modules (dynamic import), check SDK version compatibility. Plugins run in-process via dynamic import() — this gives them full Node.js runtime access. Permission system is a UX/administrative boundary, not security sandbox. Document this honestly in plugin-sdk README. Future: investigate Worker threads or subprocess isolation for untrusted plugins.
+- [X] T074 [BE] [US3] Implement hook dispatcher in `packages/plugin-sdk/src/host/`: ordered invocation by priority, error isolation per hook, timeout enforcement, faulted-state tracking (FR-018). Implement crash-loop prevention: track fault count + timestamps per plugin. When plugin faults ≥3 times within rolling 10-minute window, auto-set status='disabled', audit-log auto-disable, and skip subsequent invocations until admin re-enables. Fault counter resets only on explicit re-enable.
+- [X] T075 [BE] [US3] Implement permission system in `packages/plugin-sdk/src/permissions/`: declare in manifest, prompt on install, grant/deny persist to `plugins.grantedPermissions`, runtime enforcement on `PluginApiClient`
+- [X] T076 [BE] [US3] Implement `PluginApiClient` in `packages/plugin-sdk/src/`: scoped, permission-checked API with rate limiting (30 req/min) and timeout (5s)
+- [X] T077 [BE] [US3] Implement plugin test utilities: `createTestContext`, `mockPayload` builders in `packages/plugin-sdk/src/testing.ts` per contracts/plugin-sdk.md §Testing Support
+- [X] T078 [BE] [US3] Write reference plugin: "log every deployment event to stdout" in `plugins/deploy-logger/` with manifest, hook implementation, and package.json
+- [X] T079 [BE] [US3] Integrate plugin host into deployment pipeline: fire `pre-deploy`, `post-deploy`, `deploy-failed` hooks in `packages/core/src/deploy/`
+- [X] T080 [BE] [US3] Integrate plugin host into server/project lifecycle: fire `server-added`, `server-removed`, `project-created`, `project-deleted` hooks in `packages/core/src/server-mgmt/` and project services
+- [X] T081 [BE] [US3] Implement plugin install/list/enable/disable/remove CLI commands in `apps/cli/src/commands/plugins.ts`
+- [X] T082 [FE] [US3] Add plugin management page to web UI: list plugins, status (active/faulted/disabled/failed), permissions, last invoked, enable/disable in `apps/web/src/components/`
+- [X] T083 [E2E] [US3] Integration test: install reference plugin → trigger deploy → verify hook fires (acceptance scenarios 1–2, SC-003)
+- [X] T084 [E2E] [US3] Integration test: plugin throws in hook → verify deployment continues, plugin marked faulted (FR-018, acceptance scenario 3)
+- [X] T085 [E2E] [US3] Integration test: plugin declares permission → user prompted to grant/deny → recorded (FR-019, acceptance scenario 4)
 
 **Checkpoint**: User Stories 1, 2, AND 3 should all work independently
 

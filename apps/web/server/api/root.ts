@@ -25,6 +25,7 @@ import { mysqlRouter } from "./routers/mysql";
 import { notificationRouter } from "./routers/notification";
 import { organizationRouter } from "./routers/organization";
 import { patchRouter } from "./routers/patch";
+import { pluginRouter } from "./routers/plugin";
 import { portRouter } from "./routers/port";
 import { postgresRouter } from "./routers/postgres";
 import { previewDeploymentRouter } from "./routers/preview-deployment";
@@ -106,6 +107,7 @@ export const appRouter = createTRPCRouter({
 	tag: tagRouter,
 	patch: patchRouter,
 	secret: secretRouter,
+	plugin: pluginRouter,
 });
 
 // export type definition of API

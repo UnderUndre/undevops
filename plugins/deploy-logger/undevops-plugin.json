@@ -1,0 +1,15 @@
+{
+  "name": "deploy-logger",
+  "version": "1.0.0",
+  "description": "Logs every deployment event via structured logger",
+  "author": "undevops",
+  "license": "MIT",
+  "sdkVersion": "^0.1.0",
+  "hooks": [
+    { "name": "pre-deploy", "priority": 10 },
+    { "name": "post-deploy", "priority": 90 },
+    { "name": "deploy-failed", "priority": 90 }
+  ],
+  "permissions": ["deploy:read"],
+  "settings": []
+}
