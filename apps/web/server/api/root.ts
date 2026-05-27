@@ -4,6 +4,7 @@ import { aiRouter } from "./routers/ai";
 import { applicationRouter } from "./routers/application";
 import { backupRouter } from "./routers/backup";
 import { bitbucketRouter } from "./routers/bitbucket";
+import { mcpTokenRouter } from "./routers/mcp-token";
 import { certificateRouter } from "./routers/certificate";
 import { clusterRouter } from "./routers/cluster";
 import { composeRouter } from "./routers/compose";
@@ -73,6 +74,7 @@ export const appRouter = createTRPCRouter({
 	libsql: libsqlRouter,
 	mariadb: mariadbRouter,
 	mongo: mongoRouter,
+	mcpToken: mcpTokenRouter,
 	mounts: mountRouter,
 	mysql: mysqlRouter,
 	notification: notificationRouter,

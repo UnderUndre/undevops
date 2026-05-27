@@ -150,20 +150,20 @@
 
 ### Implementation for US2
 
-- [ ] T057 [BE] [US2] Implement stdio transport adapter in `apps/mcp-server/src/transport/` — stdin/stdout JSON-RPC
-- [ ] T058 [BE] [US2] Implement SSE transport adapter in `apps/mcp-server/src/transport/` — HTTP `GET /sse` + `POST /messages`, heartbeat every 30s
-- [ ] T059 [BE] [US2] Implement `undevops://servers` resource handler (list + detail) in `apps/mcp-server/src/resources/` per contracts/mcp-api.md
-- [ ] T060 [BE] [US2] Implement `undevops://projects` resource handler (list + detail with environments) in `apps/mcp-server/src/resources/` per contracts/mcp-api.md
-- [ ] T061 [BE] [US2] Implement `undevops://deployments` resource handler (list + detail, paginated) in `apps/mcp-server/src/resources/` per contracts/mcp-api.md
-- [ ] T062 [BE] [US2] Implement `undevops://deployments/{id}/logs` resource handler (last N lines, p95 < 500ms) in `apps/mcp-server/src/resources/` per contracts/mcp-api.md (SC-002)
-- [ ] T063 [BE] [US2] Implement `undevops://audit` resource handler (paginated, filterable by actor/action/target/time) in `apps/mcp-server/src/resources/` per contracts/mcp-api.md
-- [ ] T064 [BE] [US2] Add `undevops://version` resource: undevops version, upstream Dokploy version, loaded plugins per FR-033
-- [ ] T065 [BE] [US2] Implement MCP request audit logging: record client ID, resource accessed, timestamp to `audit_log` with `actor_type: "agent"` (FR-014)
-- [ ] T066 [BE] [US2] Implement rate limiting per MCP token via Redis sliding window per contracts/mcp-api.md §Rate Limiting
-- [ ] T067 [FE] [US2] Add MCP token management page in web UI: create, list (name, scope, prefix, last-used, request count), revoke per FR-013a, FR-013b
-- [ ] T068 [FE] [US2] Add audit log viewer page: filterable by actor_type, action, target_resource, time range in `apps/web/src/components/`
-- [ ] T069 [BE] [US2] Implement CLI commands: `mcp-tokens create/list/revoke` in `apps/cli/src/commands/`
-- [ ] T070 [E2E] [US2] Integration test: MCP client → list servers → read deployment logs → verify value-based secret redaction (known secret values replaced with ``***REDACTED***`` in any field position) → verify < 500ms p95 (acceptance scenarios 1–4, SC-002, SC-008)
+- [X] T057 [BE] [US2] Implement stdio transport adapter in `apps/mcp-server/src/transport/` — stdin/stdout JSON-RPC
+- [X] T058 [BE] [US2] Implement SSE transport adapter in `apps/mcp-server/src/transport/` — HTTP `GET /sse` + `POST /messages`, heartbeat every 30s
+- [X] T059 [BE] [US2] Implement `undevops://servers` resource handler (list + detail) in `apps/mcp-server/src/resources/` per contracts/mcp-api.md
+- [X] T060 [BE] [US2] Implement `undevops://projects` resource handler (list + detail with environments) in `apps/mcp-server/src/resources/` per contracts/mcp-api.md
+- [X] T061 [BE] [US2] Implement `undevops://deployments` resource handler (list + detail, paginated) in `apps/mcp-server/src/resources/` per contracts/mcp-api.md
+- [X] T062 [BE] [US2] Implement `undevops://deployments/{id}/logs` resource handler (last N lines, p95 < 500ms) in `apps/mcp-server/src/resources/` per contracts/mcp-api.md (SC-002)
+- [X] T063 [BE] [US2] Implement `undevops://audit` resource handler (paginated, filterable by actor/action/target/time) in `apps/mcp-server/src/resources/` per contracts/mcp-api.md
+- [X] T064 [BE] [US2] Add `undevops://version` resource: undevops version, upstream Dokploy version, loaded plugins per FR-033
+- [X] T065 [BE] [US2] Implement MCP request audit logging: record client ID, resource accessed, timestamp to `audit_log` with `actor_type: "agent"` (FR-014)
+- [X] T066 [BE] [US2] Implement rate limiting per MCP token via Redis sliding window per contracts/mcp-api.md §Rate Limiting
+- [X] T067 [FE] [US2] Add MCP token management page in web UI: create, list (name, scope, prefix, last-used, request count), revoke per FR-013a, FR-013b
+- [X] T068 [FE] [US2] Add audit log viewer page: filterable by actor_type, action, target_resource, time range in `apps/web/src/components/`
+- [X] T069 [BE] [US2] Implement CLI commands: `mcp-tokens create/list/revoke` in `apps/cli/src/commands/`
+- [X] T070 [E2E] [US2] Integration test: MCP client → list servers → read deployment logs → verify value-based secret redaction (known secret values replaced with ``***REDACTED***`` in any field position) → verify < 500ms p95 (acceptance scenarios 1–4, SC-002, SC-008)
 
 **Checkpoint**: User Stories 1 AND 2 should both work independently
 

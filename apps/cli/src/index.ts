@@ -5,6 +5,7 @@ import { projectCommand } from "./commands/project.js";
 import { deployCommand, deploymentCommand } from "./commands/deploy.js";
 import { secretCommand } from "./commands/secret.js";
 import { envCommand } from "./commands/env.js";
+import { mcpTokensCommand } from "./commands/mcp-tokens.js";
 
 const program = new Command();
 
@@ -19,5 +20,6 @@ program.addCommand(deployCommand);
 program.addCommand(deploymentCommand);
 program.addCommand(secretCommand);
 program.addCommand(envCommand);
+program.addCommand(mcpTokensCommand);
 
 program.parse();
