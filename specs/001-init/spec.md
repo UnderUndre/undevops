@@ -173,6 +173,7 @@ A growing team outgrows a single VPS. They add a second and third server to unde
 - **FR-014**: All MCP requests MUST be recorded in the audit log with the initiating client identifier
 
 **Plugin System (P2)**:
+- The Plugin SDK supports an **External API Consumer Pattern** for integrating self-hosted services that expose their own control plane API (e.g., network tunnel managers, monitoring stacks). In this pattern, the plugin acts as a typed API client — surfacing status, triggering actions, and registering UI panels — without replicating the external service's data model or logic. Auth credentials are stored via undevops secrets; degraded-mode behavior is required when the external service is unreachable. See `contracts/plugin-sdk.md` §External API Consumer Pattern for the full contract, and the unet tunnel manager plugin as the reference implementation.
 - **FR-015**: System MUST load TypeScript plugins from a documented directory or via an `install` command
 - **FR-016**: Plugins MUST be able to subscribe to lifecycle hooks: `pre-deploy`, `post-deploy`, `deploy-failed`, `server-added`, `server-removed`, `project-created`, `project-deleted` (extensible list)
 - **FR-017**: Plugin hook invocations MUST receive typed payloads matching a versioned plugin SDK contract

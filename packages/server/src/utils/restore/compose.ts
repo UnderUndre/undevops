@@ -1,6 +1,6 @@
-import type { apiRestoreBackup } from "@dokploy/server/db/schema";
-import type { Compose } from "@dokploy/server/services/compose";
-import type { Destination } from "@dokploy/server/services/destination";
+import type { apiRestoreBackup } from "@undevops/server/db/schema";
+import type { Compose } from "@undevops/server/services/compose";
+import type { Destination } from "@undevops/server/services/destination";
 import type { z } from "zod";
 import { getS3Credentials } from "../backups/utils";
 import { execAsync, execAsyncRemote } from "../process/execAsync";

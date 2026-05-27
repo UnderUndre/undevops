@@ -1,10 +1,10 @@
-import { db } from "@dokploy/server/db";
+import { db } from "@undevops/server/db";
 import {
 	invitation,
 	member,
 	organization,
 	user,
-} from "@dokploy/server/db/schema";
+} from "@undevops/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { IS_CLOUD } from "../constants";
