@@ -42,20 +42,20 @@
 
 **Purpose**: Rebrand from Dokploy, restructure monorepo, scaffold new packages
 
-- [ ] T001 [SETUP] Rename all `package.json` `name` fields from `@dokploy/*` to `@undevops/*` across monorepo
-- [ ] T002 [SETUP] Update all `workspace:*` references and internal imports (`from "@dokploy/..."` → `from "@undevops/..."`) across all files
-- [ ] T003 [SETUP] Rename `apps/dokploy/` → `apps/web/` and `apps/schedules/` → `apps/scheduler/`; update `pnpm-workspace.yaml`
-- [ ] T004 [OPS] Update `docker-compose.yml` and `docker-compose.prod.yml` to reference new app names and image prefixes
-- [ ] T005 [OPS] Update `.github/workflows/` CI/CD pipelines for new paths, app names, and `@undevops/*` package names
-- [ ] T006 [SETUP] Update root `README.md`, `LICENSE`, and in-product attribution — preserve Dokploy Apache 2.0 notices per FR-031, SC-007
-- [ ] T007 [SETUP] Verify full build succeeds after rename: `pnpm install && pnpm build` (gate: blocks all downstream work)
-- [ ] T008 [SETUP] Verify all existing tests pass after rename: `pnpm test` (gate: confirms no regressions)
-- [ ] T008a [SETUP] Verify build and tests pass on Windows developer host: `pnpm install && pnpm build && pnpm test` on Windows (FR-032 baseline, SC-009)
-- [ ] T009 [SETUP] Create `packages/core` skeleton: `package.json` (`@undevops/core`), `tsconfig.json`, `src/index.ts`
-- [ ] T010 [SETUP] Create `packages/plugin-sdk` skeleton: `package.json` (`@undevops/plugin-sdk`), `tsconfig.json`, `src/index.ts`
-- [ ] T011 [SETUP] Create `packages/ai-pack` skeleton: `package.json` (`@undevops/ai-pack`), `tsconfig.json`, `src/index.ts`
-- [ ] T012 [SETUP] Create `apps/mcp-server` skeleton: `package.json` (`@undevops/mcp-server`), `tsconfig.json`, `Dockerfile`, `src/index.ts`
-- [ ] T013 [SETUP] Create `apps/cli` skeleton: `package.json` (`@undevops/cli`), `tsconfig.json`, commander setup in `src/index.ts`
+- [X] T001 [SETUP] Rename all `package.json` `name` fields from `@dokploy/*` to `@undevops/*` across monorepo
+- [X] T002 [SETUP] Update all `workspace:*` references and internal imports (`from "@dokploy/..."` → `from "@undevops/..."`) across all files
+- [X] T003 [SETUP] Rename `apps/dokploy/` → `apps/web/` and `apps/schedules/` → `apps/scheduler/`; update `pnpm-workspace.yaml`
+- [X] T004 [OPS] Update `docker-compose.yml` and `docker-compose.prod.yml` to reference new app names and image prefixes
+- [X] T005 [OPS] Update `.github/workflows/` CI/CD pipelines for new paths, app names, and `@undevops/*` package names
+- [X] T006 [SETUP] Update root `README.md`, `LICENSE`, and in-product attribution — preserve Dokploy Apache 2.0 notices per FR-031, SC-007
+- [X] T007 [SETUP] Verify full build succeeds after rename: `pnpm install && pnpm build` (gate: blocks all downstream work)
+- [X] T008 [SETUP] Verify all existing tests pass after rename: `pnpm test` (gate: confirms no regressions)
+- [X] T008a [SETUP] Verify build and tests pass on Windows developer host: `pnpm install && pnpm build && pnpm test` on Windows (FR-032 baseline, SC-009)
+- [X] T009 [SETUP] Create `packages/core` skeleton: `package.json` (`@undevops/core`), `tsconfig.json`, `src/index.ts`
+- [X] T010 [SETUP] Create `packages/plugin-sdk` skeleton: `package.json` (`@undevops/plugin-sdk`), `tsconfig.json`, `src/index.ts`
+- [X] T011 [SETUP] Create `packages/ai-pack` skeleton: `package.json` (`@undevops/ai-pack`), `tsconfig.json`, `src/index.ts`
+- [X] T012 [SETUP] Create `apps/mcp-server` skeleton: `package.json` (`@undevops/mcp-server`), `tsconfig.json`, `Dockerfile`, `src/index.ts`
+- [X] T013 [SETUP] Create `apps/cli` skeleton: `package.json` (`@undevops/cli`), `tsconfig.json`, commander setup in `src/index.ts`
 
 ---
 
