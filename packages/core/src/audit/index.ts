@@ -12,3 +12,11 @@ export {
 	auditCancel,
 	auditEnvironmentCreate,
 } from "./operations";
+export {
+	computeRowHash,
+	verifyChain,
+	generateIntegrityAlert,
+	type AuditLogRow,
+	type IntegrityAlert,
+} from "./tamper-evidence";
+export { computeAndAttachHash } from "./hash-chain";

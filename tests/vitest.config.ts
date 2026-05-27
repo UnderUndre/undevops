@@ -1,6 +1,7 @@
 import path from "node:path";
-import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
+
+const ROOT = path.resolve(__dirname, "..");
 
 export default defineConfig({
 	test: {
@@ -10,21 +11,45 @@ export default defineConfig({
 		testTimeout: 300_000,
 		hookTimeout: 120_000,
 	},
-	plugins: [
-		tsconfigPaths({
-			projects: [path.resolve(__dirname, "tsconfig.json")],
-		}),
-	],
 	resolve: {
 		alias: {
-			"@undevops/server": path.resolve(
-				__dirname,
-				"packages/server/src",
-			),
-			"@undevops/core": path.resolve(
-				__dirname,
-				"packages/core/src",
-			),
+			"@undevops/server/db": path.resolve(ROOT, "packages/server/src/db"),
+			"@undevops/server/db/schema/backups": path.resolve(ROOT, "packages/server/src/db/schema/backups"),
+			"@undevops/server/db/schema/deployment": path.resolve(ROOT, "packages/server/src/db/schema/deployment"),
+			"@undevops/server/db/schema/destination": path.resolve(ROOT, "packages/server/src/db/schema/destination"),
+			"@undevops/server/db/schema/application": path.resolve(ROOT, "packages/server/src/db/schema/application"),
+			"@undevops/server/db/schema/environment": path.resolve(ROOT, "packages/server/src/db/schema/environment"),
+			"@undevops/server/db/schema/project": path.resolve(ROOT, "packages/server/src/db/schema/project"),
+			"@undevops/server/db/schema/mcp-client": path.resolve(ROOT, "packages/server/src/db/schema/mcp-client"),
+			"@undevops/server/db/schema/pending-agent-action": path.resolve(ROOT, "packages/server/src/db/schema/pending-agent-action"),
+			"@undevops/server/db/schema/account": path.resolve(ROOT, "packages/server/src/db/schema/account"),
+			"@undevops/server/db/schema/control-plane-backup": path.resolve(ROOT, "packages/server/src/db/schema/control-plane-backup"),
+			"@undevops/server/db/schema/audit-log": path.resolve(ROOT, "packages/server/src/db/schema/audit-log"),
+			"@undevops/server/db/schema/server": path.resolve(ROOT, "packages/server/src/db/schema/server"),
+			"@undevops/server/db/schema": path.resolve(ROOT, "packages/server/src/db/schema"),
+			"@undevops/server/services/proprietary/backup-status": path.resolve(ROOT, "packages/server/src/services/proprietary/backup-status"),
+			"@undevops/server/services/pending-action": path.resolve(ROOT, "packages/server/src/services/pending-action"),
+			"@undevops/server/utils/backups/utils": path.resolve(ROOT, "packages/server/src/utils/backups/utils"),
+			"@undevops/server/utils/process/execAsync": path.resolve(ROOT, "packages/server/src/utils/process/execAsync"),
+			"@undevops/server/utils/git-branch-validation": path.resolve(ROOT, "packages/server/src/utils/git-branch-validation"),
+			"@undevops/server": path.resolve(ROOT, "packages/server/src"),
+			"@undevops/core/secrets/backup-encryption": path.resolve(ROOT, "packages/core/src/secrets/backup-encryption"),
+			"@undevops/core/audit/tamper-evidence": path.resolve(ROOT, "packages/core/src/audit/tamper-evidence"),
+			"@undevops/core/audit/hash-chain": path.resolve(ROOT, "packages/core/src/audit/hash-chain"),
+			"@undevops/core/deploy/replica-scheduler": path.resolve(ROOT, "packages/core/src/deploy/replica-scheduler"),
+			"@undevops/core/deploy/replica-rescheduler": path.resolve(ROOT, "packages/core/src/deploy/replica-rescheduler"),
+			"@undevops/core/deploy/review-gate": path.resolve(ROOT, "packages/core/src/deploy/review-gate"),
+			"@undevops/core/deploy/log-store": path.resolve(ROOT, "packages/core/src/deploy/log-store"),
+			"@undevops/core/server-mgmt/health-monitor": path.resolve(ROOT, "packages/core/src/server-mgmt/health-monitor"),
+			"@undevops/core/proxy/multi-node-lb": path.resolve(ROOT, "packages/core/src/proxy/multi-node-lb"),
+			"@undevops/core/secrets": path.resolve(ROOT, "packages/core/src/secrets"),
+			"@undevops/core/audit": path.resolve(ROOT, "packages/core/src/audit"),
+			"@undevops/core/deploy": path.resolve(ROOT, "packages/core/src/deploy"),
+			"@undevops/core": path.resolve(ROOT, "packages/core/src"),
+			"@undevops/ai-pack/src/review/index": path.resolve(ROOT, "packages/ai-pack/src/review/index"),
+			"@undevops/ai-pack/src/review/gate-evaluator": path.resolve(ROOT, "packages/ai-pack/src/review/gate-evaluator"),
+			"@undevops/ai-pack/src/types/reviewer": path.resolve(ROOT, "packages/ai-pack/src/types/reviewer"),
+			"@undevops/ai-pack": path.resolve(ROOT, "packages/ai-pack/src"),
 		},
 	},
 });

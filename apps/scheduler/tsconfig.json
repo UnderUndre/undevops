@@ -10,7 +10,8 @@
 		"declaration": false,
 		"baseUrl": ".",
 		"paths": {
-			"@undevops/server/*": ["../../packages/server/src/*"]
+			"@undevops/server/*": ["../../packages/server/src/*"],
+			"@undevops/core/*": ["../../packages/core/src/*"]
 		}
 	},
 	"exclude": ["node_modules", "dist"],

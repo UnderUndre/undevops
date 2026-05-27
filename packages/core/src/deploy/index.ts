@@ -75,3 +75,8 @@ export {
   buildSpreadPlacementPreference,
   scheduleReplicasForApplication,
 } from "./replica-scheduler";
+
+export {
+  getLogContent,
+  type S3Config,
+} from "./log-store";

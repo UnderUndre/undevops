@@ -26,6 +26,8 @@ export const auditLog = pgTable(
 		actor_type: actorType("actor_type").notNull().default("human"),
 		actor_id: text("actor_id"),
 		payload: jsonb("payload").$type<Record<string, unknown>>(),
+		row_hash: text("row_hash"),
+		previous_hash: text("previous_hash"),
 	},
 	(t) => ({
 		orgIdx: index("auditLog_organizationId_idx").on(t.organizationId),

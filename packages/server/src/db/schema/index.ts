@@ -1,4 +1,5 @@
 export * from "./account";
+export * from "./control-plane-backup";
 export * from "./ai";
 export * from "./application";
 export * from "./audit-log";

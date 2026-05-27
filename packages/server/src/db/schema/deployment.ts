@@ -34,6 +34,7 @@ export const deployments = pgTable("deployment", {
 	description: text("description"),
 	status: deploymentStatus("status").default("running"),
 	logPath: text("logPath").notNull(),
+	logUri: text("logUri"),
 	pid: text("pid"),
 	applicationId: text("applicationId").references(
 		() => applications.applicationId,

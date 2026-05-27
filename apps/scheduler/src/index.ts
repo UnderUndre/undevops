@@ -67,6 +67,22 @@ app.post("/update-backup", zValidator("json", jobQueueSchema), async (c) => {
 				type: "volume-backup",
 				cronSchedule: job.pattern || "",
 			});
+		} else if (data.type === "control-plane-backup") {
+			result = await removeJob({
+				type: "control-plane-backup",
+				destinationId: data.destinationId,
+				cronSchedule: job.pattern || "",
+			});
+		} else if (data.type === "integrity-scan") {
+			result = await removeJob({
+				type: "integrity-scan",
+				cronSchedule: job.pattern || "",
+			});
+		} else if (data.type === "log-rotation") {
+			result = await removeJob({
+				type: "log-rotation",
+				cronSchedule: job.pattern || "",
+			});
 		}
 		logger.info({ result }, "Job removed");
 	}

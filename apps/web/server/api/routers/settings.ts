@@ -1071,4 +1071,165 @@ export const settingsRouter = createTRPCRouter({
 		const ips = process.env.DOKPLOY_CLOUD_IPS?.split(",");
 		return ips;
 	}),
+
+	getBackupConfig: adminProcedure.query(async () => {
+		if (IS_CLOUD) {
+			return null;
+		}
+		try {
+			const { readMainConfig } = await import(
+				"@undevops/server/utils/backups/backup-config"
+			);
+			return readMainConfig();
+		} catch {
+			return null;
+		}
+	}),
+
+	saveBackupConfig: adminProcedure
+		.input(
+			z.object({
+				endpoint: z.string().min(1),
+				bucket: z.string().min(1),
+				accessKeyId: z.string().min(1),
+				secretAccessKey: z.string().min(1),
+				pathPrefix: z.string().optional(),
+				region: z.string().optional(),
+			}),
+		)
+		.mutation(async ({ input, ctx }) => {
+			if (IS_CLOUD) {
+				return true;
+			}
+			try {
+				const { saveBackupConfig } = await import(
+					"@undevops/server/utils/backups/backup-config"
+				);
+				await saveBackupConfig(input);
+				await audit(ctx, {
+					action: "update",
+					resourceType: "settings",
+					resourceName: "backup-config",
+				});
+				return true;
+			} catch (error) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message:
+						error instanceof Error
+							? error.message
+							: "Error saving backup configuration",
+				});
+			}
+		}),
+
+	saveBackupSchedule: adminProcedure
+		.input(
+			z.object({
+				schedule: z.string().min(1),
+				enabled: z.boolean(),
+			}),
+		)
+		.mutation(async ({ input, ctx }) => {
+			if (IS_CLOUD) {
+				return true;
+			}
+			try {
+				const { saveBackupSchedule } = await import(
+					"@undevops/server/utils/backups/backup-config"
+				);
+				await saveBackupSchedule(input);
+				await audit(ctx, {
+					action: "update",
+					resourceType: "settings",
+					resourceName: "backup-schedule",
+				});
+				return true;
+			} catch (error) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message:
+						error instanceof Error
+							? error.message
+							: "Error saving backup schedule",
+				});
+			}
+		}),
+
+	testBackupConnection: adminProcedure
+		.input(
+			z.object({
+				endpoint: z.string().min(1),
+				bucket: z.string().min(1),
+				accessKeyId: z.string().min(1),
+				secretAccessKey: z.string().min(1),
+				region: z.string().optional(),
+			}),
+		)
+		.mutation(async ({ input }) => {
+			if (IS_CLOUD) {
+				return true;
+			}
+			try {
+				const { testBackupS3Connection } = await import(
+					"@undevops/server/utils/backups/backup-config"
+				);
+				await testBackupS3Connection(input);
+				return true;
+			} catch (error) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message:
+						error instanceof Error
+							? error.message
+							: "Connection test failed",
+				});
+			}
+		}),
+
+	getBackupStatus: adminProcedure.query(async () => {
+		if (IS_CLOUD) {
+			return null;
+		}
+		try {
+			const { getBackupStatus } = await import(
+				"@undevops/server/utils/backups/backup-config"
+			);
+			return getBackupStatus();
+		} catch {
+			return {
+				lastSuccessfulBackup: null,
+				lastAttemptedBackup: null,
+				lastError: null,
+				totalBackupsInRetention: 0,
+				nextScheduledBackup: null,
+			};
+		}
+	}),
+
+	triggerManualBackup: adminProcedure.mutation(async ({ ctx }) => {
+		if (IS_CLOUD) {
+			return true;
+		}
+		try {
+			const { triggerManualBackup } = await import(
+				"@undevops/server/utils/backups/backup-config"
+			);
+			await triggerManualBackup();
+			await audit(ctx, {
+				action: "run",
+				resourceType: "settings",
+				resourceName: "manual-backup",
+			});
+			return true;
+		} catch (error) {
+			throw new TRPCError({
+				code: "BAD_REQUEST",
+				message:
+					error instanceof Error
+						? error.message
+						: "Error triggering manual backup",
+			});
+		}
+	}),
 });

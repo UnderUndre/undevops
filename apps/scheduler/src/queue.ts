@@ -47,6 +47,24 @@ export const scheduleJob = async (job: QueueJob) => {
 				pattern: job.cronSchedule,
 			},
 		});
+	} else if (job.type === "control-plane-backup") {
+		await jobQueue.add("control-plane-backup", job, {
+			repeat: {
+				pattern: job.cronSchedule,
+			},
+		});
+	} else if (job.type === "integrity-scan") {
+		await jobQueue.add("integrity-scan", job, {
+			repeat: {
+				pattern: job.cronSchedule,
+			},
+		});
+	} else if (job.type === "log-rotation") {
+		await jobQueue.add("log-rotation", job, {
+			repeat: {
+				pattern: job.cronSchedule,
+			},
+		});
 	}
 };
 
@@ -79,6 +97,24 @@ export const removeJob = async (data: QueueJob) => {
 		});
 		return result;
 	}
+	if (data.type === "control-plane-backup") {
+		const result = await jobQueue.removeRepeatable("control-plane-backup", {
+			pattern: data.cronSchedule,
+		});
+		return result;
+	}
+	if (data.type === "integrity-scan") {
+		const result = await jobQueue.removeRepeatable("integrity-scan", {
+			pattern: data.cronSchedule,
+		});
+		return result;
+	}
+	if (data.type === "log-rotation") {
+		const result = await jobQueue.removeRepeatable("log-rotation", {
+			pattern: data.cronSchedule,
+		});
+		return result;
+	}
 	return false;
 };
 
@@ -105,6 +141,18 @@ export const getJobRepeatable = async (
 		const { volumeBackupId } = data;
 		const job = repeatableJobs.find((j) => j.name === volumeBackupId);
 		return job ? job : null;
+	}
+	if (data.type === "control-plane-backup") {
+		const job = repeatableJobs.find((j) => j.name === "control-plane-backup");
+		return job ?? null;
+	}
+	if (data.type === "integrity-scan") {
+		const job = repeatableJobs.find((j) => j.name === "integrity-scan");
+		return job ?? null;
+	}
+	if (data.type === "log-rotation") {
+		const job = repeatableJobs.find((j) => j.name === "log-rotation");
+		return job ?? null;
 	}
 	return null;
 };

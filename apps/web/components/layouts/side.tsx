@@ -19,6 +19,7 @@ import {
 	Forward,
 	GalleryVerticalEnd,
 	GitBranch,
+	HardDrive,
 	House,
 	Key,
 	KeyRound,
@@ -361,6 +362,14 @@ const MENU: Menu = {
 			url: "/dashboard/settings/destinations",
 			icon: Database,
 			isEnabled: ({ permissions }) => !!permissions?.destination.read,
+		},
+		{
+			isSingle: true,
+			title: "Backup",
+			url: "/dashboard/settings/backup",
+			icon: HardDrive,
+			isEnabled: ({ permissions, isCloud }) =>
+				!!(permissions?.organization.update && !isCloud),
 		},
 
 		{

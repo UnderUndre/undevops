@@ -13,6 +13,7 @@ import {
 import { fetchDeploymentJobs } from "./service.js";
 import { deploy } from "./utils.js";
 import { webhooks } from "./routes/webhooks.js";
+import { backupRouter } from "./routes/backup.js";
 
 const app = new Hono();
 
@@ -178,6 +179,7 @@ app.get("/health", async (c) => {
 });
 
 app.route("/webhooks", webhooks);
+app.route("/api/backup", backupRouter);
 
 // List deployment jobs (Inngest runs) for a server - same shape as BullMQ queue for the UI
 app.get("/jobs", async (c) => {

@@ -19,6 +19,7 @@ import {
 	and,
 	backups,
 	db,
+	destinations,
 	eq,
 	schedules,
 	server,
@@ -115,6 +116,20 @@ export const runJobs = async (job: QueueJob) => {
 			if (volumeBackup.enabled) {
 				await runVolumeBackup(volumeBackupId);
 			}
+		} else if (job.type === "control-plane-backup") {
+			const { destinationId } = job;
+			const dest = await db.query.destinations.findFirst({
+				where: eq(destinations.destinationId, destinationId),
+			});
+			if (!dest) {
+				throw new Error(`Destination ${destinationId} not found for control-plane backup`);
+			}
+			logger.info({ destinationId }, "Running control-plane backup");
+		} else if (job.type === "integrity-scan") {
+			logger.info("Running integrity scan");
+		} else if (job.type === "log-rotation") {
+			const { rotateDeploymentLogs } = await import("./jobs/log-rotation.js");
+			await rotateDeploymentLogs();
 		}
 	} catch (error) {
 		logger.error(error);
@@ -269,4 +284,43 @@ export const initializeJobs = async () => {
 		{ Quantity: filteredVolumeBackupsBasedOnServerStatus.length },
 		"Volume Backups Initialized",
 	);
+
+	const cpCron = process.env.CONTROL_PLANE_BACKUP_CRON ?? "0 2 * * *";
+	try {
+		const firstDestination = await db.query.destinations.findFirst();
+		if (firstDestination) {
+			await scheduleJob({
+				type: "control-plane-backup",
+				cronSchedule: cpCron,
+				destinationId: firstDestination.destinationId,
+			});
+			logger.info({ cron: cpCron }, "Control-Plane Backup Initialized");
+		} else {
+			logger.info("Control-Plane Backup skipped (no S3 destination in DB)");
+		}
+	} catch (error) {
+		logger.error(error, "Failed to schedule control-plane backup");
+	}
+
+	const integrityCron = process.env.INTEGRITY_SCAN_CRON ?? "0 */6 * * *";
+	try {
+		await scheduleJob({
+			type: "integrity-scan",
+			cronSchedule: integrityCron,
+		});
+		logger.info({ cron: integrityCron }, "Integrity Scan Initialized");
+	} catch (error) {
+		logger.error(error, "Failed to schedule integrity scan");
+	}
+
+	const logRotationCron = process.env.LOG_ROTATION_CRON ?? "0 * * * *";
+	try {
+		await scheduleJob({
+			type: "log-rotation",
+			cronSchedule: logRotationCron,
+		});
+		logger.info({ cron: logRotationCron }, "Log Rotation Initialized");
+	} catch (error) {
+		logger.error(error, "Failed to schedule log rotation");
+	}
 };

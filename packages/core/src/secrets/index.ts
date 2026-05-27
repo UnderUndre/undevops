@@ -43,3 +43,5 @@ export function decrypt(encrypted: string, iv: string, tag: string): string {
 export function rotate(plaintext: string): { encrypted: string; iv: string; tag: string } {
   return encrypt(plaintext);
 }
+
+export { encryptBuffer, decryptBuffer } from "./backup-encryption";

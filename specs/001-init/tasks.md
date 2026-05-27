@@ -277,21 +277,21 @@
 
 **Purpose**: Verification, security hardening, backup/restore, and cross-cutting concerns
 
-- [ ] T124 [BE] Implement backup job in `apps/scheduler/src/jobs/`: `pg_dump --single-transaction --format=custom` → AES-256-GCM encrypt → S3 upload via `@aws-sdk/client-s3` per FR-035, FR-036, FR-037. `--single-transaction` ensures atomic snapshot consistency at scale envelope.
-- [ ] T125 [BE] Implement restore command in `apps/cli/src/commands/`: download from S3 → decrypt → `pg_restore` to fresh instance per FR-039, SC-011
-- [ ] T126 [OPS] Schedule backup via BullMQ in `apps/scheduler/`: default every 6 hours, configurable per FR-035
-- [ ] T127 [BE] Add backup status endpoint: last success timestamp, last attempt, last error per FR-038
-- [ ] T128 [FE] Add backup configuration UI: S3 settings, schedule, manual trigger, status display per FR-038
-- [ ] T129 [BE] Add backup status MCP resource: `undevops://backup-status` per FR-038
-- [ ] T130 [E2E] Integration test: configure backup → trigger → verify S3 upload → restore to fresh instance < 30 min (SC-011, SC-013)
-- [ ] T131 [E2E] Regression: all Wave 1 + Wave 2 tests pass after Wave 3 changes
-- [ ] T132 [E2E] Load test at scale envelope: 50 servers, 500 projects, 30 replicas, 30-day retention — verify no non-linear degradation (SC-012)
-- [ ] T133 [SEC] Security audit: verify no secret values in MCP responses, AI reviewer payloads, audit log free-text, application logs (SC-008)
-- [ ] T134 [SEC] Security audit: verify Apache 2.0 attribution in all distributed artifacts (SC-007)
-- [ ] T135 [E2E] Verify cross-platform dev: build + test on Windows, macOS, Linux from single documented procedure (SC-009)
-- [ ] T135a [OPS] Implement deployment log rotation: compress (gzip) + upload to S3 after deployment finishes; delete local file after 24h grace; update deployment.logUri to S3 path; MCP logs endpoint fetches from S3 if local missing. BullMQ scheduled job for cleanup. (scale envelope: controller disk stays under 50GB at 30-day sustained load)
-- [ ] T135b [BE] Implement audit-log tamper-evidence: REVOKE UPDATE/DELETE on audit_log from application role; add hash chain column (SHA-256 of previous row hash + own data); periodic integrity-scan job verifies chain; alert admin on break
-- [ ] T136 [OPS] Run quickstart.md validation: follow guide end-to-end on fresh VPS, verify < 15 min (SC-001)
+- [X] T124 [BE] Implement backup job in `apps/scheduler/src/jobs/`: `pg_dump --single-transaction --format=custom` → AES-256-GCM encrypt → S3 upload via `@aws-sdk/client-s3` per FR-035, FR-036, FR-037. `--single-transaction` ensures atomic snapshot consistency at scale envelope.
+- [X] T125 [BE] Implement restore command in `apps/cli/src/commands/`: download from S3 → decrypt → `pg_restore` to fresh instance per FR-039, SC-011
+- [X] T126 [OPS] Schedule backup via BullMQ in `apps/scheduler/`: default every 6 hours, configurable per FR-035
+- [X] T127 [BE] Add backup status endpoint: last success timestamp, last attempt, last error per FR-038
+- [X] T128 [FE] Add backup configuration UI: S3 settings, schedule, manual trigger, status display per FR-038
+- [X] T129 [BE] Add backup status MCP resource: `undevops://backup-status` per FR-038
+- [X] T130 [E2E] Integration test: configure backup → trigger → verify S3 upload → restore to fresh instance < 30 min (SC-011, SC-013)
+- [X] T131 [E2E] Regression: all Wave 1 + Wave 2 tests pass after Wave 3 changes
+- [X] T132 [E2E] Load test at scale envelope: 50 servers, 500 projects, 30 replicas, 30-day retention — verify no non-linear degradation (SC-012)
+- [X] T133 [SEC] Security audit: verify no secret values in MCP responses, AI reviewer payloads, audit log free-text, application logs (SC-008)
+- [X] T134 [SEC] Security audit: verify Apache 2.0 attribution in all distributed artifacts (SC-007)
+- [X] T135 [E2E] Verify cross-platform dev: build + test on Windows, macOS, Linux from single documented procedure (SC-009)
+- [X] T135a [OPS] Implement deployment log rotation: compress (gzip) + upload to S3 after deployment finishes; delete local file after 24h grace; update deployment.logUri to S3 path; MCP logs endpoint fetches from S3 if local missing. BullMQ scheduled job for cleanup. (scale envelope: controller disk stays under 50GB at 30-day sustained load)
+- [X] T135b [BE] Implement audit-log tamper-evidence: REVOKE UPDATE/DELETE on audit_log from application role; add hash chain column (SHA-256 of previous row hash + own data); periodic integrity-scan job verifies chain; alert admin on break
+- [X] T136 [OPS] Run quickstart.md validation: follow guide end-to-end on fresh VPS, verify < 15 min (SC-001)
 
 ---
 
