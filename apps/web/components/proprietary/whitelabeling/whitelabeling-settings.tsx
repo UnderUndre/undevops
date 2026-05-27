@@ -288,10 +288,10 @@ export function WhitelabelingSettings() {
 									<FormItem>
 										<FormLabel>Application Name</FormLabel>
 										<FormControl>
-											<Input placeholder="Dokploy" {...field} />
+											<Input placeholder="undevops" {...field} />
 										</FormControl>
 										<FormDescription>
-											Replaces "Dokploy" across the entire interface.
+											Replaces "undevops" across the entire interface.
 										</FormDescription>
 										<FormMessage />
 									</FormItem>
@@ -312,7 +312,7 @@ export function WhitelabelingSettings() {
 										</FormControl>
 										<FormDescription>
 											Tagline shown on the login/onboarding pages. Defaults to
-											the standard Dokploy description if empty.
+											the standard undevops description if empty.
 										</FormDescription>
 										<FormMessage />
 									</FormItem>
@@ -449,10 +449,10 @@ export function WhitelabelingSettings() {
 									<FormItem>
 										<FormLabel>Page Title</FormLabel>
 										<FormControl>
-											<Input placeholder="Dokploy" {...field} />
+											<Input placeholder="undevops" {...field} />
 										</FormControl>
 										<FormDescription>
-											Browser tab title. Defaults to "Dokploy" if empty.
+											Browser tab title. Defaults to "undevops" if empty.
 										</FormDescription>
 										<FormMessage />
 									</FormItem>

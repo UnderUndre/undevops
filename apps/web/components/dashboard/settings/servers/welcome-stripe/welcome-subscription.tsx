@@ -101,10 +101,9 @@ export const WelcomeSubscription = () => {
 
 				<DialogHeader>
 					<DialogTitle className="text-2xl text-center">
-						Welcome To Dokploy Cloud 🎉
-					</DialogTitle>
-					<DialogDescription className="text-center max-w-xl mx-auto">
-						Thank you for choosing Dokploy Cloud! 🚀 We're excited to have you
+						Welcome To undevops Cloud 🎉
+
+						Thank you for choosing undevops Cloud! 🚀 We're excited to have you
 						onboard. Before you dive in, you'll need to configure your remote
 						server to unlock all the features we offer.
 					</DialogDescription>
@@ -317,7 +316,7 @@ export const WelcomeSubscription = () => {
 												that your server can handle?
 											</p>
 											<p className="text-muted-foreground">
-												Here are some of the things you can do with Dokploy
+												Here are some of the things you can do with undevops
 												Cloud:
 											</p>
 										</div>

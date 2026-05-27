@@ -400,7 +400,7 @@ const EnvironmentPage = (
 			{ enabled: !!selectedTargetProject },
 		);
 	const { config: whitelabeling } = useWhitelabeling();
-	const appName = whitelabeling?.appName || "Dokploy";
+	const appName = whitelabeling?.appName || "undevops";
 
 	const emptyServices =
 		!currentEnvironment ||
@@ -974,24 +974,11 @@ const EnvironmentPage = (
 		return Array.from(servers.values());
 	}, [applications]);
 
-	// Check if there are services without a server (Dokploy server)
-	const hasServicesWithoutServer = useMemo(() => {
-		if (!applications) return false;
-		return applications.some((service) => !service.serverId);
-	}, [applications]);
+		// Check if there are services without a server (undevops server)
 
-	const filteredServices = useMemo(() => {
-		if (!applications) return [];
-		const filtered = applications.filter(
-			(service) =>
-				(service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-					service.description
-						?.toLowerCase()
-						.includes(searchQuery.toLowerCase())) &&
-				(selectedTypes.length === 0 || selectedTypes.includes(service.type)) &&
-				(selectedServerId === "" ||
-					selectedServerId === "all" ||
-					(selectedServerId === "dokploy-server" && !service.serverId) ||
+		const filteredServices = allServices.filter((service) => {
+			const isMatch =
+				(selectedServerId === "undevops-server" && !service.serverId) ||
 					service.serverId === selectedServerId),
 		);
 		return sortServices(filtered);
@@ -1575,10 +1562,10 @@ const EnvironmentPage = (
 												<SelectContent>
 													<SelectItem value="all">All servers</SelectItem>
 													{hasServicesWithoutServer && (
-														<SelectItem value="dokploy-server">
+														<SelectItem value="undevops-server">
 															<div className="flex items-center gap-2">
 																<ServerIcon className="size-4" />
-																<span>Dokploy server</span>
+																<span>undevops server</span>
 															</div>
 														</SelectItem>
 													)}

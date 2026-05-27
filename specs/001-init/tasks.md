@@ -112,26 +112,31 @@
 
 ### Implementation for US1
 
-- [ ] T039 [BE] [US1] Verify and stabilize Docker orchestration (dockerode + compose) works with `@undevops/core` package names in `packages/core/src/deploy/`
-- [ ] T040 [BE] [US1] Verify and stabilize Traefik integration (reverse proxy + TLS via Let's Encrypt) end-to-end in `packages/core/src/proxy/`
-- [ ] T041 [BE] [US1] Verify build system (Dockerfile, nixpacks, railpack) works with renamed packages in `packages/core/src/deploy/`
-- [ ] T041a [BE] [US1] Implement webhook signature verification (HMAC-SHA256) for GitHub/GitLab/Bitbucket in `apps/api/src/routes/webhooks/` — reject unsigned or invalid-signature webhooks with 401
-- [ ] T042 [BE] [US1] Verify server SSH connectivity (SSH2) in `packages/core/src/server-mgmt/`
-- [ ] T043 [BE] [US1] Implement zero-downtime deploy: keep previous version healthy until new passes health check in `packages/core/src/deploy/` (FR-006). Hard timeout: if new container doesn't pass health check within 10 minutes, fail deployment, mark it as failed, and unblock deployment queue. Never let queue hang indefinitely.
-- [ ] T044 [BE] [US1] Implement real-time log streaming to web UI via SSE in `packages/core/src/deploy/` (FR-004)
-- [ ] T045 [BE] [US1] Implement concurrent deployment queue: only one per project, queue collapses to latest commit in `packages/core/src/deploy/`
-- [ ] T046 [BE] [US1] Integrate secret encryption at rest (AES-256-GCM) into deployment flow — inject decrypted secrets at runtime, never log values in `packages/core/src/secrets/` (FR-008)
-- [ ] T046a [BE] [US1] Implement startup reconciliation: on controller start, compare DB state vs running containers and certificate state, surface discrepancies (crash recovery edge case per spec)
-- [ ] T047 [FE] [US1] Rebrand web UI: update logo, name, colors, all Dokploy references → undevops in `apps/web/src/app/` and `apps/web/src/components/`
-- [ ] T048 [FE] [US1] Add environment management UI within projects: create, configure (gate policy, reviewers), view deployments in `apps/web/src/components/`
-- [ ] T049 [FE] [US1] Add secrets management UI: create, rotate, delete — values never shown after creation in `apps/web/src/components/`
-- [ ] T050 [FE] [US1] Update deployment flow UI: select environment, view health check progress, rollback button in `apps/web/src/components/`
-- [ ] T051 [FE] [US1] Add server health dashboard: status, resource usage, connected since in `apps/web/src/components/`
-- [ ] T052 [FE] [US1] Add version display in UI footer/settings (undevops version, upstream Dokploy version, loaded plugins) in `apps/web/src/components/`
-- [ ] T053 [BE] [US1] Implement CLI commands: `server list/add/remove`, `project list/create/deploy`, `deployment list/logs`, `secret set/list`, `env set/list/unset` in `apps/cli/src/commands/` (FR-010)
-- [ ] T054 [BE] [US1] Add JSON output format (`--format json`) for all CLI commands in `apps/cli/src/output/`
-- [ ] T055 [BE] [US1] Implement audit logging for all US1 state-changing operations (deploy, server add/remove, project create/delete, secret set) in `packages/core/src/audit/` (SC-006)
-- [ ] T056 [E2E] [US1] Integration test: fresh server → connect → deploy project → verify HTTPS (acceptance scenario 1–4, SC-001)
+- [X] T039 [BE] [US1] Verify and stabilize Docker orchestration (dockerode + compose) works with `@undevops/core` package names in `packages/core/src/deploy/`
+- [X] T040 [BE] [US1] Verify and stabilize Traefik integration (reverse proxy + TLS via Let's Encrypt) end-to-end in `packages/core/src/proxy/`
+- [X] T041 [BE] [US1] Verify build system (Dockerfile, nixpacks, railpack) works with renamed packages in `packages/core/src/deploy/`
+- [X] T041a [BE] [US1] Implement webhook signature verification (HMAC-SHA256) for GitHub/GitLab/Bitbucket in `apps/api/src/routes/webhooks/` — reject unsigned or invalid-signature webhooks with 401
+- [X] T042 [BE] [US1] Verify server SSH connectivity (SSH2) in `packages/core/src/server-mgmt/`
+- [X] T043 [BE] [US1] Implement zero-downtime deploy: keep previous version healthy until new passes health check in `packages/core/src/deploy/` (FR-006). Hard timeout: if new container doesn't pass health check within 10 minutes, fail deployment, mark it as failed, and unblock deployment queue. Never let queue hang indefinitely.
+- [X] T044 [BE] [US1] Implement real-time log streaming to web UI via SSE in `packages/core/src/deploy/` (FR-004)
+- [X] T045 [BE] [US1] Implement concurrent deployment queue: only one per project, queue collapses to latest commit in `packages/core/src/deploy/`
+- [X] T046 [BE] [US1] Integrate secret encryption at rest (AES-256-GCM) into deployment flow — inject decrypted secrets at runtime, never log values in `packages/core/src/secrets/` (FR-008)
+- [X] T046a [BE] [US1] Implement startup reconciliation: on controller start, compare DB state vs running containers and certificate state, surface discrepancies (crash recovery edge case per spec)
+- [X] T047 [FE] [US1] Rebrand web UI: update logo, name, colors, all Dokploy references → undevops in `apps/web/components/` and `apps/web/pages/`
+
+- [X] T048 [FE] [US1] Add environment management UI within projects: create, configure (gate policy, reviewers), view deployments in `apps/web/components/dashboard/environments/`
+
+- [X] T049 [FE] [US1] Add secrets management UI: create, rotate, delete — values never shown after creation in `apps/web/components/dashboard/secrets/`
+
+- [X] T050 [FE] [US1] Update deployment flow UI: select environment, view health check progress, rollback button in `apps/web/components/dashboard/deploy-flow/`
+
+- [X] T051 [FE] [US1] Add server health dashboard: status, resource usage, connected since in `apps/web/components/dashboard/server-health/`
+
+- [X] T052 [FE] [US1] Add version display in UI footer/settings (undevops version, upstream Dokploy version, loaded plugins) in `apps/web/components/dashboard/version-display/`
+- [X] T053 [BE] [US1] Implement CLI commands: `server list/add/remove`, `project list/create/deploy`, `deployment list/logs`, `secret set/list`, `env set/list/unset` in `apps/cli/src/commands/` (FR-010)
+- [X] T054 [BE] [US1] Add JSON output format (`--format json`) for all CLI commands in `apps/cli/src/output/`
+- [X] T055 [BE] [US1] Implement audit logging for all US1 state-changing operations (deploy, server add/remove, project create/delete, secret set) in `packages/core/src/audit/` (SC-006)
+- [X] T056 [E2E] [US1] Integration test: fresh server → connect → deploy project → verify HTTPS (acceptance scenario 1–4, SC-001)
 
 **Checkpoint**: User Story 1 should be fully functional and testable independently
 

@@ -12,13 +12,14 @@ import {
 } from "./schema.js";
 import { fetchDeploymentJobs } from "./service.js";
 import { deploy } from "./utils.js";
+import { webhooks } from "./routes/webhooks.js";
 
 const app = new Hono();
 
 // Initialize Inngest client
 export const inngest = new Inngest({
-	id: "dokploy-deployments",
-	name: "Dokploy Deployment Service",
+	id: "undevops-deployments",
+	name: "Undevops Deployment Service",
 });
 
 export const deploymentFunction = inngest.createFunction(
@@ -175,6 +176,8 @@ app.post(
 app.get("/health", async (c) => {
 	return c.json({ status: "ok" });
 });
+
+app.route("/webhooks", webhooks);
 
 // List deployment jobs (Inngest runs) for a server - same shape as BullMQ queue for the UI
 app.get("/jobs", async (c) => {
