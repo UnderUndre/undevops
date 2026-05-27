@@ -41,7 +41,7 @@ export const refreshGitlabToken = async (gitlabProviderId: string) => {
 		throw new Error(`Failed to refresh token: ${response.statusText}`);
 	}
 
-	const data = await response.json();
+	const data = (await response.json()) as { expires_in: number; access_token: string; refresh_token: string };
 
 	const expiresAt = Math.floor(Date.now() / 1000) + data.expires_in;
 
@@ -236,7 +236,7 @@ export const getGitlabBranches = async (input: {
 			);
 		}
 
-		const branches = await branchesResponse.json();
+		const branches = (await branchesResponse.json()) as Array<{ name: string }>;
 
 		if (branches.length === 0) {
 			break;
@@ -318,7 +318,7 @@ export const validateGitlabProvider = async (gitlabProvider: Gitlab) => {
 				});
 			}
 
-			const projects = await response.json();
+			const projects = (await response.json()) as Array<{ id: number; name: string; path_with_namespace: string; default_branch: string; http_url_to_repo: string; ssh_url_to_repo: string; description: string }>;
 
 			if (projects.length === 0) {
 				break;

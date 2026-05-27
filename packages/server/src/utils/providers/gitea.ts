@@ -72,7 +72,7 @@ export const refreshGiteaToken = async (giteaProviderId: string) => {
 			return giteaProvider?.accessToken || null;
 		}
 
-		const data = await response.json();
+		const data = (await response.json()) as { access_token?: string; refresh_token?: string; expires_in?: number };
 		const { access_token, refresh_token, expires_in } = data;
 
 		if (!access_token) {

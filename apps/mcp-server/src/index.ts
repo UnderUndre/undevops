@@ -10,3 +10,6 @@
  */
 
 export const MCP_SERVER_VERSION = "0.1.0";
+
+export * as bearerAuth from "./auth/bearer-token.js";
+export * as redaction from "./redaction.js";

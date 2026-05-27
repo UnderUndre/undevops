@@ -13,7 +13,9 @@
   },
   "dependencies": {
     "@undevops/core": "workspace:*",
-    "@modelcontextprotocol/sdk": "^1.12.0"
+    "@undevops/server": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "drizzle-orm": "^3.0.0"
   },
   "devDependencies": {
     "typescript": "^5.8.0",

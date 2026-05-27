@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
-import { index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { index, jsonb, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { nanoid } from "nanoid";
+import { actorType } from "./shared";
 import { organization } from "./account";
 import { user } from "./user";
 
@@ -22,11 +23,19 @@ export const auditLog = pgTable(
 		resourceName: text("resource_name"),
 		metadata: text("metadata"),
 		createdAt: timestamp("created_at").defaultNow().notNull(),
+		actor_type: actorType("actor_type").notNull().default("human"),
+		actor_id: text("actor_id"),
+		payload: jsonb("payload").$type<Record<string, unknown>>(),
 	},
 	(t) => ({
 		orgIdx: index("auditLog_organizationId_idx").on(t.organizationId),
 		userIdx: index("auditLog_userId_idx").on(t.userId),
 		createdAtIdx: index("auditLog_createdAt_idx").on(t.createdAt),
+		actorTypeIdx: index("auditLog_actorType_idx").on(t.actor_type),
+		actorIdIdx: index("auditLog_actorId_idx").on(t.actor_id),
+		actorCreatedIdx: index("auditLog_actor_created_idx").on(t.actor_id, t.createdAt),
+		actionCreatedIdx: index("auditLog_action_created_idx").on(t.action, t.createdAt),
+		targetCreatedIdx: index("auditLog_target_created_idx").on(t.resourceId, t.createdAt),
 	}),
 );
 

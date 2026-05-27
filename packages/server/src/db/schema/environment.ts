@@ -1,6 +1,7 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import { boolean, pgTable, text } from "drizzle-orm/pg-core";
 import { nanoid } from "nanoid";
+import { gatePolicyType } from "./shared";
 import { z } from "zod";
 import { applications } from "./application";
 import { compose } from "./compose";
@@ -27,6 +28,9 @@ export const environments = pgTable("environment", {
 		.notNull()
 		.references(() => projects.projectId, { onDelete: "cascade" }),
 	isDefault: boolean("isDefault").notNull().default(false),
+	gatePolicy: gatePolicyType("gatePolicy").notNull().default("disabled"),
+	reviewerIds: text("reviewerIds").array().notNull().default(sql`ARRAY[]::text[]`),
+	autoApproveAgents: boolean("autoApproveAgents").notNull().default(false),
 });
 
 export const environmentRelations = relations(

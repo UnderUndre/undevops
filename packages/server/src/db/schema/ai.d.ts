@@ -1,0 +1,182 @@
+import { z } from "zod";
+export declare const ai: import("drizzle-orm/pg-core").PgTableWithColumns<{
+    name: "ai";
+    schema: undefined;
+    columns: {
+        aiId: import("drizzle-orm/pg-core").PgColumn<{
+            name: "aiId";
+            tableName: "ai";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: true;
+            isPrimaryKey: true;
+            isAutoincrement: false;
+            hasRuntimeDefault: true;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
+        name: import("drizzle-orm/pg-core").PgColumn<{
+            name: "name";
+            tableName: "ai";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
+        apiUrl: import("drizzle-orm/pg-core").PgColumn<{
+            name: "apiUrl";
+            tableName: "ai";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
+        apiKey: import("drizzle-orm/pg-core").PgColumn<{
+            name: "apiKey";
+            tableName: "ai";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
+        model: import("drizzle-orm/pg-core").PgColumn<{
+            name: "model";
+            tableName: "ai";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
+        isEnabled: import("drizzle-orm/pg-core").PgColumn<{
+            name: "isEnabled";
+            tableName: "ai";
+            dataType: "boolean";
+            columnType: "PgBoolean";
+            data: boolean;
+            driverParam: boolean;
+            notNull: true;
+            hasDefault: true;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
+        organizationId: import("drizzle-orm/pg-core").PgColumn<{
+            name: "organizationId";
+            tableName: "ai";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
+        createdAt: import("drizzle-orm/pg-core").PgColumn<{
+            name: "createdAt";
+            tableName: "ai";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: true;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: true;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
+    };
+    dialect: "pg";
+}>;
+export declare const aiRelations: import("drizzle-orm").Relations<"ai", {
+    organization: import("drizzle-orm").One<"organization", true>;
+}>;
+export declare const apiCreateAi: z.ZodObject<{
+    name: z.ZodNonOptional<z.ZodString>;
+    apiUrl: z.ZodNonOptional<z.ZodString>;
+    apiKey: z.ZodNonOptional<z.ZodString>;
+    model: z.ZodNonOptional<z.ZodString>;
+    isEnabled: z.ZodNonOptional<z.ZodOptional<z.ZodOptional<z.ZodBoolean>>>;
+}, z.core.$strip>;
+export declare const apiUpdateAi: z.ZodObject<{
+    name: z.ZodOptional<z.ZodString>;
+    createdAt: z.ZodOptional<z.ZodOptional<z.ZodString>>;
+    aiId: z.ZodString;
+    apiUrl: z.ZodOptional<z.ZodString>;
+    apiKey: z.ZodOptional<z.ZodString>;
+    model: z.ZodOptional<z.ZodString>;
+    isEnabled: z.ZodOptional<z.ZodOptional<z.ZodOptional<z.ZodBoolean>>>;
+}, z.core.$strip>;
+export declare const deploySuggestionSchema: z.ZodObject<{
+    environmentId: z.ZodString;
+    id: z.ZodString;
+    dockerCompose: z.ZodString;
+    envVariables: z.ZodString;
+    serverId: z.ZodOptional<z.ZodString>;
+    name: z.ZodString;
+    description: z.ZodString;
+    domains: z.ZodOptional<z.ZodArray<z.ZodObject<{
+        host: z.ZodString;
+        port: z.ZodNumber;
+        serviceName: z.ZodString;
+    }, z.core.$strip>>>;
+    configFiles: z.ZodOptional<z.ZodArray<z.ZodObject<{
+        filePath: z.ZodString;
+        content: z.ZodString;
+    }, z.core.$strip>>>;
+}, z.core.$strip>;
+//# sourceMappingURL=ai.d.ts.map

@@ -138,7 +138,7 @@ export const getBitbucketRepositories = async (bitbucketId?: string) => {
 	const username =
 		bitbucketProvider.bitbucketWorkspaceName ||
 		bitbucketProvider.bitbucketUsername;
-	let url = `https://api.bitbucket.org/2.0/repositories/${username}?pagelen=100`;
+	let url: string | null = `https://api.bitbucket.org/2.0/repositories/${username}?pagelen=100`;
 	let repositories: {
 		name: string;
 		url: string;
@@ -160,7 +160,7 @@ export const getBitbucketRepositories = async (bitbucketId?: string) => {
 				});
 			}
 
-			const data = await response.json();
+			const data = (await response.json()) as { values: any[]; next?: string };
 
 			const mappedData = data.values.map((repo: any) => ({
 				name: repo.name,
@@ -187,7 +187,7 @@ export const getBitbucketBranches = async (
 	}
 	const bitbucketProvider = await findBitbucketById(input.bitbucketId);
 	const { owner, repo } = input;
-	let url = `https://api.bitbucket.org/2.0/repositories/${owner}/${repo}/refs/branches?pagelen=1`;
+	let url: string | null = `https://api.bitbucket.org/2.0/repositories/${owner}/${repo}/refs/branches?pagelen=1`;
 	let allBranches: {
 		name: string;
 		commit: {
@@ -209,7 +209,7 @@ export const getBitbucketBranches = async (
 				});
 			}
 
-			const data = await response.json();
+			const data = (await response.json()) as { values: any[]; next?: string };
 
 			const mappedData = data.values.map((branch: any) => {
 				return {
@@ -261,9 +261,9 @@ export const testBitbucketConnection = async (
 			});
 		}
 
-		const data = await response.json();
+	const data = (await response.json()) as { values: any[] };
 
-		const mappedData = data.values.map((repo: any) => {
+	const mappedData = data.values.map((repo: any) => {
 			return {
 				name: repo.name,
 				url: repo.links.html.href,

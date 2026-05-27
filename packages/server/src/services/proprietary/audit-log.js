@@ -1,0 +1,57 @@
+import { db } from "@undevops/server/db";
+import { auditLog } from "@undevops/server/db/schema";
+import { hasValidLicense } from "@undevops/server/services/proprietary/license-key";
+import { and, desc, eq, gte, ilike, lte } from "drizzle-orm";
+/**
+ * Creates an audit log entry. Fire-and-forget safe — errors are swallowed
+ * so a logging failure never breaks the main operation.
+ */
+export const createAuditLog = async (input) => {
+    try {
+        const licensed = await hasValidLicense(input.organizationId);
+        if (!licensed)
+            return;
+        await db.insert(auditLog).values({
+            organizationId: input.organizationId,
+            userId: input.userId,
+            userEmail: input.userEmail,
+            userRole: input.userRole,
+            action: input.action,
+            resourceType: input.resourceType,
+            resourceId: input.resourceId,
+            resourceName: input.resourceName,
+            metadata: input.metadata ? JSON.stringify(input.metadata) : undefined,
+        });
+    }
+    catch (err) {
+        console.error("[audit-log] Failed to create audit log entry:", err);
+    }
+};
+export const getAuditLogs = async (input) => {
+    const { organizationId, userId, userEmail, resourceName, action, resourceType, from, to, limit = 50, offset = 0, } = input;
+    const conditions = [eq(auditLog.organizationId, organizationId)];
+    if (userId)
+        conditions.push(eq(auditLog.userId, userId));
+    if (userEmail)
+        conditions.push(ilike(auditLog.userEmail, `%${userEmail}%`));
+    if (resourceName)
+        conditions.push(ilike(auditLog.resourceName, `%${resourceName}%`));
+    if (action)
+        conditions.push(eq(auditLog.action, action));
+    if (resourceType)
+        conditions.push(eq(auditLog.resourceType, resourceType));
+    if (from)
+        conditions.push(gte(auditLog.createdAt, from));
+    if (to)
+        conditions.push(lte(auditLog.createdAt, to));
+    const [logs, total] = await Promise.all([
+        db.query.auditLog.findMany({
+            where: and(...conditions),
+            orderBy: [desc(auditLog.createdAt)],
+            limit,
+            offset,
+        }),
+        db.$count(auditLog, and(...conditions)),
+    ]);
+    return { logs, total };
+};

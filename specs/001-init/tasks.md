@@ -67,38 +67,38 @@
 
 ### Database Schema & Migrations
 
-- [ ] T014 [DB] Add new `pgEnum` types to Drizzle schema in `packages/server/src/db/schema.ts`: `actorType`, `gateStatusType`, `gatePolicyType`, `agentActionType`, `pendingActionStatus`, `mcpAccessLevel`, `mcpTargetType`, `aiProviderType`, `verdictType`, `secretScopeType`
-- [ ] T015 [DB] Add `mcp_clients` table to Drizzle schema with SHA-256 token hash, scope, revocation, request counter per data-model.md Migration 002
-- [ ] T016 [DB] Add `plugins` table to Drizzle schema with manifest JSON, fault tracking, hook subscriptions per data-model.md Migration 003
-- [ ] T017 [DB] Add `ai_reviewers` table to Drizzle schema with provider, credential ref, timeout per data-model.md Migration 004
-- [ ] T018 [DB] Add `deployment_review_verdicts` table to Drizzle schema per data-model.md Migration 004
-- [ ] T019 [DB] Add `secrets` table to Drizzle schema with AES-256-GCM encrypted value, scope, versioning per data-model.md Migration 005
-- [ ] T020 [DB] Add `pending_agent_actions` table to Drizzle schema per data-model.md Migration 006
-- [ ] T021 [DB] Enhance `deployment` table: add `initiatingActorType`, `initiatingActorId`, `gateStatus` columns per data-model.md Migration 006
-- [ ] T022 [DB] Enhance `environment` table: add `gatePolicy`, `reviewerIds`, `autoApproveAgents` columns per data-model.md Migration 006
-- [ ] T023 [DB] Enhance `audit_log` table: add `actor_type`, `actor_id`, `payload` columns + new indexes per data-model.md Migration 006
-- [ ] T024 [DB] Create all performance indexes per data-model.md §Indexes for Performance: `mcpClient_tokenHash_idx`, `mcpClient_revokedAt_idx`, `auditLog_actorType_idx`, `auditLog_actorId_idx`, `verdict_deployment_reviewer_unique`, `secret_scope_idx`, `secret_key_unique`, `plugin_enabled_idx`, `pendingAction_status_idx`, `pendingAction_expiresAt_idx`
-- [ ] T025 [DB] Generate Drizzle migration files for all schema changes; verify `drizzle-kit generate` produces clean SQL
-- [ ] T026 [DB] Write seed data script in `packages/server/src/db/seed.ts` for development: test org, admin user, sample server, project, environment
+- [X] T014 [DB] Add new `pgEnum` types to Drizzle schema in `packages/server/src/db/schema.ts`: `actorType`, `gateStatusType`, `gatePolicyType`, `agentActionType`, `pendingActionStatus`, `mcpAccessLevel`, `mcpTargetType`, `aiProviderType`, `verdictType`, `secretScopeType`
+- [X] T015 [DB] Add `mcp_clients` table to Drizzle schema with SHA-256 token hash, scope, revocation, request counter per data-model.md Migration 002
+- [X] T016 [DB] Add `plugins` table to Drizzle schema with manifest JSON, fault tracking, hook subscriptions per data-model.md Migration 003
+- [X] T017 [DB] Add `ai_reviewers` table to Drizzle schema with provider, credential ref, timeout per data-model.md Migration 004
+- [X] T018 [DB] Add `deployment_review_verdicts` table to Drizzle schema per data-model.md Migration 004
+- [X] T019 [DB] Add `secrets` table to Drizzle schema with AES-256-GCM encrypted value, scope, versioning per data-model.md Migration 005
+- [X] T020 [DB] Add `pending_agent_actions` table to Drizzle schema per data-model.md Migration 006
+- [X] T021 [DB] Enhance `deployment` table: add `initiatingActorType`, `initiatingActorId`, `gateStatus` columns per data-model.md Migration 006
+- [X] T022 [DB] Enhance `environment` table: add `gatePolicy`, `reviewerIds`, `autoApproveAgents` columns per data-model.md Migration 006
+- [X] T023 [DB] Enhance `audit_log` table: add `actor_type`, `actor_id`, `payload` columns + new indexes per data-model.md Migration 006
+- [X] T024 [DB] Create all performance indexes per data-model.md §Indexes for Performance: `mcpClient_tokenHash_idx`, `mcpClient_revokedAt_idx`, `auditLog_actorType_idx`, `auditLog_actorId_idx`, `verdict_deployment_reviewer_unique`, `secret_scope_idx`, `secret_key_unique`, `plugin_enabled_idx`, `pendingAction_status_idx`, `pendingAction_expiresAt_idx`
+- [X] T025 [DB] Generate Drizzle migration files for all schema changes; verify `drizzle-kit generate` produces clean SQL
+- [X] T026 [DB] Write seed data script in `packages/server/src/db/seed.ts` for development: test org, admin user, sample server, project, environment
 
 ### Core Extraction
 
-- [ ] T027 [BE] Extract deployment orchestration from `packages/server` → `packages/core/src/deploy/` (build pipeline, Docker integration, health checks)
-- [ ] T028 [BE] Extract server management from `packages/server` → `packages/core/src/server-mgmt/` (SSH connectivity, health monitoring, registration)
-- [ ] T029 [BE] Extract Traefik/proxy integration from `packages/server` → `packages/core/src/proxy/` (reverse proxy config, TLS, routing)
-- [ ] T030 [BE] Extract secret encryption (AES-256-GCM) from `packages/server` → `packages/core/src/secrets/` (encrypt/decrypt/rotate, `UNDEVOPS_ENCRYPTION_KEY` env)
-- [ ] T031 [BE] Extract audit event recording from `packages/server` → `packages/core/src/audit/` (structured events, actor attribution, extended action types)
-- [ ] T032 [BE] Extract auth core (better-auth) from `packages/server` → `packages/core/src/auth/` (session management). Define pluggable auth interface: `IAuthProvider` with `authenticate(credentials): Promise<Session>`, `authorize(session, resource, action): Promise<boolean>`, `invalidate(sessionId): Promise<void>`. Document extension points for future SSO/RBAC adapters (FR-007)
-- [ ] T033 [BE] Update `packages/server` to re-export from `@undevops/core` for backward compatibility during transition
-- [ ] T034 [BE] Update all apps (`web`, `api`, `scheduler`) to import from `@undevops/core` directly where appropriate
-- [ ] T034a [SETUP] Configure connection pool sizing per app: web(10), api(10), mcp-server(15), scheduler(5), cli(on-demand). Set Postgres max_connections=120. Document connection budget in architecture.md
-- [ ] T035 [OPS] Add CI gate: `packages/core` builds without `packages/ai-pack` present (FR-030, SC-005 open-core readiness) in `.github/workflows/ci.yml`
+- [X] T027 [BE] Extract deployment orchestration from `packages/server` → `packages/core/src/deploy/` (build pipeline, Docker integration, health checks)
+- [X] T028 [BE] Extract server management from `packages/server` → `packages/core/src/server-mgmt/` (SSH connectivity, health monitoring, registration)
+- [X] T029 [BE] Extract Traefik/proxy integration from `packages/server` → `packages/core/src/proxy/` (reverse proxy config, TLS, routing)
+- [X] T030 [BE] Extract secret encryption (AES-256-GCM) from `packages/server` → `packages/core/src/secrets/` (encrypt/decrypt/rotate, `UNDEVOPS_ENCRYPTION_KEY` env)
+- [X] T031 [BE] Extract audit event recording from `packages/server` → `packages/core/src/audit/` (structured events, actor attribution, extended action types)
+- [X] T032 [BE] Extract auth core (better-auth) from `packages/server` → `packages/core/src/auth/` (session management). Define pluggable auth interface: `IAuthProvider` with `authenticate(credentials): Promise<Session>`, `authorize(session, resource, action): Promise<boolean>`, `invalidate(sessionId): Promise<void>`. Document extension points for future SSO/RBAC adapters (FR-007)
+- [X] T033 [BE] Update `packages/server` to re-export from `@undevops/core` for backward compatibility during transition
+- [X] T034 [BE] Update all apps (`web`, `api`, `scheduler`) to import from `@undevops/core` directly where appropriate
+- [X] T034a [SETUP] Configure connection pool sizing per app: web(10), api(10), mcp-server(15), scheduler(5), cli(on-demand). Set Postgres max_connections=120. Document connection budget in architecture.md
+- [X] T035 [OPS] Add CI gate: `packages/core` builds without `packages/ai-pack` present (FR-030, SC-005 open-core readiness) in `.github/workflows/ci.yml`
 
 ### Auth & Middleware Framework
 
-- [ ] T036 [BE] Implement actor-attributed audit middleware in `packages/core/src/audit/` — records `actor_type` (human/agent/plugin/system) and `actor_id` on every state-changing operation (FR-034 partial, SC-006)
-- [ ] T037 [BE] Implement MCP bearer token auth middleware in `apps/mcp-server/src/auth/` — SHA-256 hash lookup against `mcp_clients`, `revoked_at` check, scope extraction (FR-013). On token revocation, middleware MUST signal the SSE transport layer to close all active connections associated with revoked token hash. Implement token-revocation event bus: revocation endpoint publishes event → SSE transport subscribes → closes matching streams. Track requestCount + lastUsedAt in Redis (INCR + timestamp), flush to Postgres every 60s via scheduled job — avoids hot-row lock on auth path under burst traffic.
-- [ ] T038 [BE] Implement secret redaction middleware in `apps/mcp-server/src/` — maintain a Set of known secret values in memory; before any MCP/API response serialization, do global `replaceAll(knownSecretValue, '***REDACTED***')` on the serialized JSON string. This value-based global replace catches secrets in any field position, not just known patterns (FR-012, SC-008)
+- [X] T036 [BE] Implement actor-attributed audit middleware in `packages/core/src/audit/` — records `actor_type` (human/agent/plugin/system) and `actor_id` on every state-changing operation (FR-034 partial, SC-006)
+- [X] T037 [BE] Implement MCP bearer token auth middleware in `apps/mcp-server/src/auth/` — SHA-256 hash lookup against `mcp_clients`, `revoked_at` check, scope extraction (FR-013). On token revocation, middleware MUST signal the SSE transport layer to close all active connections associated with revoked token hash. Implement token-revocation event bus: revocation endpoint publishes event → SSE transport subscribes → closes matching streams. Track requestCount + lastUsedAt in Redis (INCR + timestamp), flush to Postgres every 60s via scheduled job — avoids hot-row lock on auth path under burst traffic.
+- [X] T038 [BE] Implement secret redaction middleware in `apps/mcp-server/src/` — maintain a Set of known secret values in memory; before any MCP/API response serialization, do global `replaceAll(knownSecretValue, '***REDACTED***')` on the serialized JSON string. This value-based global replace catches secrets in any field position, not just known patterns (FR-012, SC-008)
 
 **Checkpoint**: Foundation ready — user story implementation can now begin
 

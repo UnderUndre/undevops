@@ -9,6 +9,7 @@ import {
 import { createInsertSchema } from "drizzle-zod";
 import { nanoid } from "nanoid";
 import { z } from "zod";
+import { actorType, gateStatusType } from "./shared";
 import { applications } from "./application";
 import { backups } from "./backups";
 import { compose } from "./compose";
@@ -73,6 +74,9 @@ export const deployments = pgTable("deployment", {
 	buildServerId: text("buildServerId").references(() => server.serverId, {
 		onDelete: "cascade",
 	}),
+	initiatingActorType: actorType("initiatingActorType").notNull().default("human"),
+	initiatingActorId: text("initiatingActorId"),
+	gateStatus: gateStatusType("gateStatus").notNull().default("skipped"),
 });
 
 export const deploymentsRelations = relations(deployments, ({ one }) => ({
