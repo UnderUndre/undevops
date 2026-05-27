@@ -51,3 +51,15 @@ export {
 export {
   reconcileOnStartup,
 } from "@undevops/server/services/deploy/reconciliation";
+
+export {
+  checkGateRequired,
+  runReviewGate,
+  type GateDecision,
+} from "./review-gate";
+
+export {
+  processAdminOverride,
+  type OverrideRequest,
+  type OverrideResult,
+} from "./admin-override";

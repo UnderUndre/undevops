@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@undevops/server": "workspace:*"
+    "@undevops/server": "workspace:*",
+    "@undevops/ai-pack": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.8.0",

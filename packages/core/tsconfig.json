@@ -14,7 +14,9 @@
     "outDir": "./dist",
     "declaration": true,
     "paths": {
-      "@undevops/server/*": ["../server/src/*"]
+      "@undevops/server/*": ["../server/src/*"],
+      "@undevops/ai-pack": ["../ai-pack/src/index.ts"],
+      "@undevops/ai-pack/*": ["../ai-pack/src/*"]
     }
   },
   "include": ["src"],

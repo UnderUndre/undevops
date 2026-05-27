@@ -1,5 +1,6 @@
 import { createTRPCRouter } from "../api/trpc";
 import { adminRouter } from "./routers/admin";
+import { aiReviewerRouter } from "./routers/ai-reviewer";
 import { aiRouter } from "./routers/ai";
 import { applicationRouter } from "./routers/application";
 import { backupRouter } from "./routers/backup";
@@ -10,6 +11,7 @@ import { certificateRouter } from "./routers/certificate";
 import { clusterRouter } from "./routers/cluster";
 import { composeRouter } from "./routers/compose";
 import { deploymentRouter } from "./routers/deployment";
+import { deploymentVerdictRouter } from "./routers/deployment-verdict";
 import { destinationRouter } from "./routers/destination";
 import { dockerRouter } from "./routers/docker";
 import { domainRouter } from "./routers/domain";
@@ -66,6 +68,7 @@ export const appRouter = createTRPCRouter({
 	cluster: clusterRouter,
 	compose: composeRouter,
 	deployment: deploymentRouter,
+	deploymentVerdict: deploymentVerdictRouter,
 	destination: destinationRouter,
 	docker: dockerRouter,
 	domain: domainRouter,
@@ -96,6 +99,7 @@ export const appRouter = createTRPCRouter({
 	swarm: swarmRouter,
 	user: userRouter,
 	ai: aiRouter,
+	aiReviewer: aiReviewerRouter,
 	organization: organizationRouter,
 	licenseKey: licenseKeyRouter,
 	sso: ssoRouter,

@@ -230,23 +230,22 @@
 
 ### Implementation for US5
 
-- [ ] T098 [BE] [US5] Implement `AIReviewerProvider` interface in `packages/ai-pack/src/providers/`: `review(payload): Promise<Verdict>` with timeout support
-- [ ] T099 [BE] [US5] Implement `ClaudeReviewer` provider in `packages/ai-pack/src/providers/` using Vercel AI SDK → Claude API
-- [ ] T100 [BE] [US5] Implement `GeminiReviewer` provider in `packages/ai-pack/src/providers/` using Vercel AI SDK → Gemini API
-- [ ] T101 [BE] [US5] Implement `OpenAIReviewer` provider in `packages/ai-pack/src/providers/` using Vercel AI SDK → OpenAI API
-- [ ] T102 [BE] [US5] Implement `CodexReviewer` provider in `packages/ai-pack/src/providers/` using Vercel AI SDK → Codex API
-- [ ] T103 [BE] [US5] Implement `CustomReviewer` provider for self-hosted/OpenAI-compatible endpoints with configurable `apiUrl` in `packages/ai-pack/src/providers/`
-- [ ] T104 [BE] [US5] Implement change payload builder in `packages/ai-pack/src/review/`: diff extraction, env var change detection, compose change detection per FR-024
-- [ ] T105 [BE] [US5] Implement gate evaluator in `packages/ai-pack/src/review/`: send to all reviewers in parallel, collect verdicts with per-reviewer `timeoutSeconds`, enforce strict-by-default policy (any FAIL/ABSENT → blocked) per FR-025, FR-025a
-- [ ] T106 [BE] [US5] Implement admin override: written reason required, logged to `audit_log` with `action: "gate_bypassed"`, recorded in `deployment_review_verdicts` per FR-025
-- [ ] T107 [BE] [US5] Integrate gate into deployment flow: gated environments enter `gateStatus: "pending"` state, evaluator runs, transitions to `approved`/`rejected`/`timed_out` in `packages/core/src/deploy/`
-- [ ] T108 [BE] [US5] Persist reviewer responses in `deployment_review_verdicts` table: verdict, reasoning, confidence, payload, duration_ms per FR-026
-- [ ] T109 [FE] [US5] Add AI reviewer configuration UI: add/remove reviewers, set timeouts, assign to environments, configure model + provider in `apps/web/src/components/`
-- [ ] T110 [FE] [US5] Add review verdict display in deployment detail: per-reviewer verdict, concerns, confidence, timestamps in `apps/web/src/components/`
-- [ ] T111 [E2E] [US5] Integration test: 2 reviewers → both PASS → deploy proceeds automatically (acceptance scenarios 1–2)
-- [ ] T112 [E2E] [US5] Integration test: 2 reviewers → 1 FAIL → deploy blocked → override with reason → proceeds (acceptance scenario 3)
-- [ ] T113 [E2E] [US5] Integration test: reviewer timeout → ABSENT → strict policy blocks deploy (acceptance scenario 4, FR-025a)
-- [ ] T114 [E2E] [US5] Performance test: 2 reviewers, ≤200 changed lines → verdicts collected < 60s (SC-004)
+- [X] T098 [BE] [US5] Implement `AIReviewerProvider` interface in `packages/ai-pack/src/providers/`: `review(payload): Promise<Verdict>` with timeout support
+- [X] T099 [BE] [US5] Implement `ClaudeReviewer` provider in `packages/ai-pack/src/providers/` using Vercel AI SDK → Claude API
+- [X] T100 [BE] [US5] Implement `GeminiReviewer` provider in `packages/ai-pack/src/providers/` using Vercel AI SDK → Gemini API
+- [X] T101 [BE] [US5] Implement `OpenAIReviewer` provider in `packages/ai-pack/src/providers/` using Vercel AI SDK → OpenAI API
+- [X] T102 [BE] [US5] Implement `CodexReviewer` provider in `packages/ai-pack/src/providers/` using Vercel AI SDK → Codex API
+- [X] T103 [BE] [US5] Implement `CustomReviewer` provider for self-hosted/OpenAI-compatible endpoints with configurable `apiUrl` in `packages/ai-pack/src/providers/`
+- [X] T104 [BE] [US5] Implement change payload builder in `packages/ai-pack/src/review/`: diff extraction, env var change detection, compose change detection per FR-024
+- [X] T105 [BE] [US5] Implement gate evaluator in `packages/ai-pack/src/review/`: send to all reviewers in parallel, collect verdicts with per-reviewer `timeoutSeconds`, enforce strict-by-default policy (any FAIL/ABSENT → blocked) per FR-025, FR-025a
+- [X] T106 [BE] [US5] Implement admin override: written reason required, logged to `audit_log` with `action: "gate_bypassed"`, recorded in `deployment_review_verdicts` per FR-025
+- [X] T107 [BE] [US5] Integrate gate into deployment flow: gated environments enter `gateStatus: "pending"` state, evaluator runs, transitions to `approved`/`rejected`/`timed_out` in `packages/core/src/deploy/`
+- [X] T109 [FE] [US5] Add AI reviewer configuration UI: add/remove reviewers, set timeouts, assign to environments, configure model + provider in `apps/web/src/components/`
+- [X] T110 [FE] [US5] Add review verdict display in deployment detail: per-reviewer verdict, concerns, confidence, timestamps in `apps/web/src/components/`
+- [X] T111 [E2E] [US5] Integration test: 2 reviewers → both PASS → deploy proceeds automatically (acceptance scenarios 1–2)
+- [X] T112 [E2E] [US5] Integration test: 2 reviewers → 1 FAIL → deploy blocked → override with reason → proceeds (acceptance scenario 3)
+- [X] T113 [E2E] [US5] Integration test: reviewer timeout → ABSENT → strict policy blocks deploy (acceptance scenario 4, FR-025a)
+- [X] T114 [E2E] [US5] Performance test: 2 reviewers, ≤200 changed lines → verdicts collected < 60s (SC-004)
 
 **Checkpoint**: User Stories 1–5 should all work independently
 
