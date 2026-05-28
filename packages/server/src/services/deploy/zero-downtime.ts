@@ -5,7 +5,8 @@ import { db } from "@undevops/server/db";
 import { deployments } from "@undevops/server/db/schema";
 import { getRemoteDocker } from "@undevops/server/utils/servers/remote-docker";
 import { eq } from "drizzle-orm";
-import type { Container, Dockerode } from "dockerode";
+import type Dockerode from "dockerode";
+import type { Container } from "dockerode";
 import pino from "pino";
 
 const logger = pino({ name: "zero-downtime" });

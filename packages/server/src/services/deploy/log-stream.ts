@@ -1,7 +1,7 @@
 import { createReadStream, existsSync, statSync, watchFile } from "node:fs";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { createInterface } from "node:readline";
-import { logger } from "../logger.js";
+import { logger } from "../../lib/logger.js";
 
 interface LogStreamOptions {
 	logPath: string;
@@ -95,7 +95,7 @@ export function handleLogStream(req: IncomingMessage, res: ServerResponse, optio
 }
 
 export function createLogStreamHandler(getLogPath: (deploymentId: string) => string | null) {
-	return async (c: { req: { header(name: string): string | undefined }; param: (name: string) => string; req: { on: (event: string, cb: () => void) => void }; write: (data: string) => void; end: () => void; setHeader: (name: string, value: string) => void }) => {
+	return async (c: { req: { header(name: string): string | undefined; on: (event: string, cb: () => void) => void }; param: (name: string) => string; write: (data: string) => void; end: () => void; setHeader: (name: string, value: string) => void }) => {
 		const deploymentId = c.param("deploymentId");
 		if (!deploymentId) {
 			return { status: 400, body: { error: "deploymentId required" } };

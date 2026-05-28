@@ -91,6 +91,7 @@ const noopWorker = {
 	cancelAllJobs: () => Promise.resolve(),
 };
 
-export const deploymentWorker = !IS_CLOUD
-	? createDeploymentWorker()
-	: (noopWorker as unknown as Worker<DeploymentJob>);
+export const deploymentWorker =
+	!IS_CLOUD && process.env.NEXT_PHASE !== "phase-production-build"
+		? createDeploymentWorker()
+		: (noopWorker as unknown as Worker<DeploymentJob>);

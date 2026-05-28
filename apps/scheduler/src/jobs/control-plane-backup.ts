@@ -1,12 +1,31 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { createCipheriv, randomBytes, scryptSync } from "node:crypto";
 import {
 	S3Client,
 	PutObjectCommand,
 	type S3ClientConfig,
 } from "@aws-sdk/client-s3";
-import { encryptBuffer } from "@undevops/core/secrets/backup-encryption";
 import { logger } from "../logger.js";
+
+const BACKUP_KEY_LENGTH = 32;
+const BACKUP_IV_LENGTH = 16;
+const BACKUP_AUTH_TAG_LENGTH = 16;
+
+function getBackupEncryptionKey(): Buffer {
+	const key = process.env.UNDEVOPS_BACKUP_ENCRYPTION_KEY;
+	if (!key) throw new Error("UNDEVOPS_BACKUP_ENCRYPTION_KEY environment variable is not set");
+	return scryptSync(key, "undevops-backup-salt", BACKUP_KEY_LENGTH);
+}
+
+function encryptBuffer(buffer: Buffer): { encrypted: Buffer; iv: string; tag: string } {
+	const key = getBackupEncryptionKey();
+	const iv = randomBytes(BACKUP_IV_LENGTH);
+	const cipher = createCipheriv("aes-256-gcm", key, iv, { authTagLength: BACKUP_AUTH_TAG_LENGTH });
+	const encrypted = Buffer.concat([cipher.update(buffer), cipher.final()]);
+	const tag = cipher.getAuthTag();
+	return { encrypted, iv: iv.toString("base64"), tag: tag.toString("base64") };
+}
 
 const execFileAsync = promisify(execFile);
 

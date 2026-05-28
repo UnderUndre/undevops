@@ -126,7 +126,7 @@ async function upsertPluginRecord(plugin: LoadedPlugin, _state: string): Promise
 		await db.insert(plugins).values({
 			name: plugin.manifest.name,
 			version: plugin.manifest.version,
-			manifestJson: plugin.manifest as unknown as Record<string, unknown>,
+			manifestJson: plugin.manifest as unknown as import("@undevops/server/db/schema/plugin").PluginManifest,
 			grantedPermissions: plugin.manifest.permissions,
 			enabled: true,
 			faulted: false,
@@ -136,7 +136,7 @@ async function upsertPluginRecord(plugin: LoadedPlugin, _state: string): Promise
 			target: plugins.name,
 			set: {
 				version: plugin.manifest.version,
-				manifestJson: plugin.manifest as unknown as Record<string, unknown>,
+			manifestJson: plugin.manifest as unknown as import("@undevops/server/db/schema/plugin").PluginManifest,
 				hookSubscriptions: plugin.hookSubscriptions,
 				enabled: true,
 				faulted: false,
@@ -153,7 +153,7 @@ async function insertFailedPluginRecord(name: string, errors: string[]): Promise
 		await db.insert(plugins).values({
 			name,
 			version: "0.0.0",
-			manifestJson: {} as Record<string, unknown>,
+			manifestJson: {} as import("@undevops/server/db/schema/plugin").PluginManifest,
 			grantedPermissions: [],
 			enabled: false,
 			faulted: true,

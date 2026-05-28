@@ -1,4 +1,5 @@
-import { db, eq, and, lt, desc } from "@undevops/server/db";
+import { db, eq, and, desc } from "@undevops/server/db";
+import { lt } from "drizzle-orm";
 import { pendingAgentActions } from "@undevops/server/db/schema/pending-agent-action";
 import { TRPCError } from "@trpc/server";
 
@@ -46,7 +47,7 @@ export async function approvePendingAction(actionId: string, organizationId: str
 		.set({
 			status: "approved",
 			resolvedBy,
-			resolvedAt: new Date().toISOString(),
+			resolvedAt: new Date(),
 			resolutionNote: note ?? "Approved via web UI",
 		})
 		.where(eq(pendingAgentActions.actionId, actionId));
@@ -66,7 +67,7 @@ export async function rejectPendingAction(actionId: string, organizationId: stri
 		.set({
 			status: "rejected",
 			resolvedBy,
-			resolvedAt: new Date().toISOString(),
+			resolvedAt: new Date(),
 			resolutionNote: note ?? "Rejected via web UI",
 		})
 		.where(eq(pendingAgentActions.actionId, actionId));
@@ -75,7 +76,7 @@ export async function rejectPendingAction(actionId: string, organizationId: stri
 }
 
 export async function expireStaleActions() {
-	const now = new Date().toISOString();
+	const now = new Date();
 
 	const expired = await db
 		.update(pendingAgentActions)

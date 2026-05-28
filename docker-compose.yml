@@ -32,14 +32,14 @@ services:
   web:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     restart: unless-stopped
     ports:
       - "3000:3000"
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER:-undevops}:${POSTGRES_PASSWORD:-undevops}@postgres:5432/${POSTGRES_DB:-undevops}
       REDIS_URL: redis://redis:6379
-      NODE_ENV: production
+      NODE_ENV: dev
       NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
       UNDEVOPS_ENCRYPTION_KEY: ${UNDEVOPS_ENCRYPTION_KEY}
       UNDEVOPS_BACKUP_ENCRYPTION_KEY: ${UNDEVOPS_BACKUP_ENCRYPTION_KEY:-}
@@ -60,7 +60,7 @@ services:
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER:-undevops}:${POSTGRES_PASSWORD:-undevops}@postgres:5432/${POSTGRES_DB:-undevops}
       REDIS_URL: redis://redis:6379
-      NODE_ENV: production
+      NODE_ENV: dev
       UNDEVOPS_ENCRYPTION_KEY: ${UNDEVOPS_ENCRYPTION_KEY}
     depends_on:
       postgres:
@@ -76,7 +76,7 @@ services:
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER:-undevops}:${POSTGRES_PASSWORD:-undevops}@postgres:5432/${POSTGRES_DB:-undevops}
       REDIS_URL: redis://redis:6379
-      NODE_ENV: production
+      NODE_ENV: dev
       UNDEVOPS_ENCRYPTION_KEY: ${UNDEVOPS_ENCRYPTION_KEY}
       UNDEVOPS_BACKUP_ENCRYPTION_KEY: ${UNDEVOPS_BACKUP_ENCRYPTION_KEY:-}
     depends_on:
@@ -95,7 +95,7 @@ services:
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER:-undevops}:${POSTGRES_PASSWORD:-undevops}@postgres:5432/${POSTGRES_DB:-undevops}
       REDIS_URL: redis://redis:6379
-      NODE_ENV: production
+      NODE_ENV: dev
       UNDEVOPS_ENCRYPTION_KEY: ${UNDEVOPS_ENCRYPTION_KEY}
       MCP_SSE_PORT: "3003"
     depends_on:

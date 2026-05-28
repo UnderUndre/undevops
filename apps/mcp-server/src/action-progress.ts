@@ -1,7 +1,7 @@
 import { db, eq, desc } from "@undevops/server/db";
 import { pendingAgentActions } from "@undevops/server/db/schema/pending-agent-action";
 import { deployments } from "@undevops/server/db/schema/deployment";
-import { createLogger } from "../lib/logger.js";
+import { createLogger } from "./lib/logger.js";
 
 const logger = createLogger("undevops:mcp:action-progress");
 
@@ -10,8 +10,8 @@ export interface ActionProgress {
 	status: string;
 	deploymentStatus: string | null;
 	deploymentId: string | null;
-	createdAt: string | null;
-	resolvedAt: string | null;
+	createdAt: Date | null;
+	resolvedAt: Date | null;
 }
 
 export async function getActionProgress(actionId: string): Promise<ActionProgress> {

@@ -3,7 +3,7 @@ import { pendingAgentActions } from "@undevops/server/db/schema/pending-agent-ac
 import { deployments } from "@undevops/server/db/schema/deployment";
 import { auditLog } from "@undevops/server/db/schema/audit-log";
 import { nanoid } from "nanoid";
-import { createLogger } from "../lib/logger.js";
+import { createLogger } from "./lib/logger.js";
 
 const logger = createLogger("undevops:mcp:approval-flow");
 

@@ -4,7 +4,7 @@ import { nanoid } from "nanoid";
 import { organization } from "./account";
 import { user } from "./user";
 
-interface PluginManifest {
+export interface PluginManifest {
   name: string;
   version: string;
   description?: string;

@@ -106,7 +106,7 @@ export const WelcomeSubscription = () => {
 						Thank you for choosing undevops Cloud! 🚀 We're excited to have you
 						onboard. Before you dive in, you'll need to configure your remote
 						server to unlock all the features we offer.
-					</DialogDescription>
+					</DialogTitle>
 				</DialogHeader>
 				<div className="grid gap-4">
 					<div className="flex justify-between">

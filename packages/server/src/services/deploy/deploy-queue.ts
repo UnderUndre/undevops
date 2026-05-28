@@ -3,7 +3,7 @@ import { deployments } from "@undevops/server/db/schema";
 import { docker } from "@undevops/server/constants";
 import { getRemoteDocker } from "@undevops/server/utils/servers/remote-docker";
 import { eq, desc, and } from "drizzle-orm";
-import type { Dockerode } from "dockerode";
+import type Dockerode from "dockerode";
 import pino from "pino";
 
 const logger = pino({ name: "deploy-queue" });

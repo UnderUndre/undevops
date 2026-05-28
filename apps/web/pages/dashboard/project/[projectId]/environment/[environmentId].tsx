@@ -974,11 +974,24 @@ const EnvironmentPage = (
 		return Array.from(servers.values());
 	}, [applications]);
 
-		// Check if there are services without a server (undevops server)
+	// Check if there are services without a server (undevops server)
+	const hasServicesWithoutServer = useMemo(() => {
+		if (!applications) return false;
+		return applications.some((service) => !service.serverId);
+	}, [applications]);
 
-		const filteredServices = allServices.filter((service) => {
-			const isMatch =
-				(selectedServerId === "undevops-server" && !service.serverId) ||
+	const filteredServices = useMemo(() => {
+		if (!applications) return [];
+		const filtered = applications.filter(
+			(service) =>
+				(service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+					service.description
+						?.toLowerCase()
+						.includes(searchQuery.toLowerCase())) &&
+				(selectedTypes.length === 0 || selectedTypes.includes(service.type)) &&
+				(selectedServerId === "" ||
+					selectedServerId === "all" ||
+					(selectedServerId === "undevops-server" && !service.serverId) ||
 					service.serverId === selectedServerId),
 		);
 		return sortServices(filtered);

@@ -17,9 +17,10 @@ const createNoopQueue = () => ({
 	on: () => {},
 });
 
-const myQueue = !IS_CLOUD
-	? new Queue("deployments", { connection: redisConfig })
-	: (createNoopQueue() as unknown as Queue);
+const myQueue =
+	!IS_CLOUD && process.env.NEXT_PHASE !== "phase-production-build"
+		? new Queue("deployments", { connection: redisConfig })
+		: (createNoopQueue() as unknown as Queue);
 
 export const getJobsByApplicationId = async (applicationId: string) => {
 	const jobs = await myQueue.getJobs();

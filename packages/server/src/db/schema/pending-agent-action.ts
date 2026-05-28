@@ -7,7 +7,7 @@ import { deployments } from "./deployment";
 import { organization } from "./account";
 import { user } from "./user";
 
-interface AgentActionPayload {
+export interface AgentActionPayload {
   requestedAt: string;
   reason: string;
   changes?: { field: string; oldValue?: string; newValue?: string }[];

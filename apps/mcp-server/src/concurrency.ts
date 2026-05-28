@@ -1,6 +1,6 @@
 import { db, eq, and } from "@undevops/server/db";
 import { pendingAgentActions } from "@undevops/server/db/schema/pending-agent-action";
-import { createLogger } from "../lib/logger.js";
+import { createLogger } from "./lib/logger.js";
 import { McpError, ERROR_CODES } from "./tools/shared.js";
 
 const logger = createLogger("undevops:mcp:concurrency");

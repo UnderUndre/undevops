@@ -50,7 +50,7 @@ async function handleScale(input: Record<string, unknown>, ctx: ToolContext): Pr
 		},
 		status: "pending",
 		organizationId: ctx.organizationId,
-		expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+		expiresAt: new Date(Date.now() + 60 * 60 * 1000),
 	});
 
 	return {

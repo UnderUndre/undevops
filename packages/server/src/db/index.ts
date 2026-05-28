@@ -18,13 +18,13 @@
  * - Default pool size: 20
  */
 
-import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
+import { and, desc, eq, gte, isNull, lte, sql } from "drizzle-orm";
 import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { dbUrl } from "./constants";
 import * as schema from "./schema";
 
-export { and, desc, eq, gte, lte, sql };
+export { and, desc, eq, gte, isNull, lte, sql };
 export * from "./schema";
 
 type Database = PostgresJsDatabase<typeof schema>;

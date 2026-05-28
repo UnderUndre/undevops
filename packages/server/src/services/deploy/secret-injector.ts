@@ -1,8 +1,21 @@
 import { db } from "@undevops/server/db";
 import { secrets } from "@undevops/server/db/schema";
-import { decrypt } from "@undevops/core/secrets";
+import { createDecipheriv, scryptSync } from "node:crypto";
 import { eq, and, or } from "drizzle-orm";
 import pino from "pino";
+
+function decrypt(encrypted: string, iv: string, tag: string): string {
+	const ALGORITHM = "aes-256-gcm";
+	const KEY_LENGTH = 32;
+	const AUTH_TAG_LENGTH = 16;
+	const key = process.env.UNDEVOPS_ENCRYPTION_KEY;
+	if (!key) throw new Error("UNDEVOPS_ENCRYPTION_KEY environment variable is not set");
+	const derivedKey = scryptSync(key, "undevops-salt", KEY_LENGTH);
+	const decipher = createDecipheriv(ALGORITHM, derivedKey, Buffer.from(iv, "base64"), { authTagLength: AUTH_TAG_LENGTH });
+	decipher.setAuthTag(Buffer.from(tag, "base64"));
+	const decrypted = Buffer.concat([decipher.update(Buffer.from(encrypted, "base64")), decipher.final()]);
+	return decrypted.toString("utf8");
+}
 
 const logger = pino({
 	name: "secret-injector",

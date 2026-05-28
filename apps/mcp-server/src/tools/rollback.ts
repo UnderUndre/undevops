@@ -89,7 +89,7 @@ async function handleRollback(input: Record<string, unknown>, ctx: ToolContext):
 		status: "pending",
 		deploymentId,
 		organizationId: ctx.organizationId,
-		expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+		expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
 	});
 
 	return {

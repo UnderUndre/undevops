@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 import type { NextPageWithLayout } from "@/pages/_app";
 import { DashboardLayout } from "@/components/layouts/dashboard-layout";
 import { ShowAgentActions } from "@/components/dashboard/agent-actions/show-agent-actions";
-import { auth } from "@/auth";
+import { validateRequest } from "@undevops/server/lib/auth";
 
 const AgentActionsPage: NextPageWithLayout = () => {
 	return (
@@ -24,9 +24,9 @@ AgentActionsPage.getLayout = (page: ReactElement) => {
 
 export default AgentActionsPage;
 
-export async function getServerSideProps(context: any) {
-	const session = await auth(context.req, context.res);
-	if (!session) {
+export async function getServerSideProps({ req, res }: any) {
+	const { user } = await validateRequest(req);
+	if (!user) {
 		return { redirect: { destination: "/auth/login", permanent: false } };
 	}
 

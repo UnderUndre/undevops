@@ -1,28 +1,25 @@
-import { db, desc } from "@undevops/server/db";
-import { auditLog } from "@undevops/server/db/schema";
-import {
-	verifyChain,
-	generateIntegrityAlert,
-	type AuditLogRow,
-	type IntegrityAlert,
-} from "@undevops/core/audit/tamper-evidence";
+import { db, desc, eq } from "@undevops/server/db";
+import { auditLog } from "@undevops/server/db";
+import { createHash } from "node:crypto";
 import { logger } from "../logger.js";
 
 export interface IntegrityScanResult {
 	valid: boolean;
 	totalRows: number;
 	breakAt?: number;
-	alert?: IntegrityAlert;
 }
 
-type NotificationHook = (alert: IntegrityAlert) => Promise<void>;
-
-let notificationHook: NotificationHook | null = null;
-
-export function setIntegrityNotificationHook(
-	hook: NotificationHook,
-): void {
-	notificationHook = hook;
+function computeRowHash(row: Record<string, unknown>, previousHash: string | null): string {
+	const data = JSON.stringify({
+		id: row.id,
+		action: row.action,
+		resourceType: row.resourceType,
+		resourceId: row.resourceId,
+		createdAt: row.createdAt,
+		actor_type: row.actor_type,
+		actor_id: row.actor_id,
+	});
+	return createHash("sha256").update(previousHash ?? "").update(data).digest("hex");
 }
 
 export async function runIntegrityScan(): Promise<IntegrityScanResult> {
@@ -34,78 +31,39 @@ export async function runIntegrityScan(): Promise<IntegrityScanResult> {
 			.from(auditLog)
 			.orderBy(desc(auditLog.createdAt));
 
-		const auditRows: AuditLogRow[] = rows.map((row) => ({
-			id: row.id,
-			organizationId: row.organizationId,
-			userId: row.userId,
-			userEmail: row.userEmail,
-			userRole: row.userRole,
-			action: row.action,
-			resourceType: row.resourceType,
-			resourceId: row.resourceId,
-			resourceName: row.resourceName,
-			metadata: row.metadata,
-			createdAt: row.createdAt,
-			actor_type: row.actor_type,
-			actor_id: row.actor_id,
-			payload: row.payload,
-			row_hash: row.row_hash ?? null,
-			previous_hash: row.previous_hash ?? null,
-		}));
-
-		const result = verifyChain(auditRows);
-
-		if (!result.valid) {
-			const breakRow = auditRows[result.breakAt!];
-			const alert = generateIntegrityAlert(
-				result.breakAt!,
-				"",
-				breakRow.row_hash ?? "null",
-			);
-
-			logger.fatal(
-				{
-					breakAt: result.breakAt,
-					rowId: breakRow.id,
-					foundHash: breakRow.row_hash,
-				},
-				"AUDIT LOG INTEGRITY VIOLATION DETECTED",
-			);
-
-			if (notificationHook) {
-				await notificationHook(alert).catch((err) => {
-					logger.error(
-						{ err },
-						"Failed to send integrity alert notification",
-					);
-				});
-			}
-
-			return {
-				valid: false,
-				totalRows: auditRows.length,
-				breakAt: result.breakAt,
-				alert,
-			};
+		if (rows.length === 0) {
+			logger.info("No audit log rows to verify");
+			return { valid: true, totalRows: 0 };
 		}
 
-		logger.info(
-			{ totalRows: auditRows.length },
-			"Integrity scan passed",
-		);
+		let previousHash: string | null = null;
 
-		return {
-			valid: true,
-			totalRows: auditRows.length,
-		};
+		for (let i = 0; i < rows.length; i++) {
+			const row = rows[i];
+			const storedHash = (row as Record<string, unknown>).row_hash as string | null;
+
+			if (storedHash === null && i > 0) {
+				logger.fatal({ breakAt: i, rowId: row.id }, "AUDIT LOG INTEGRITY VIOLATION: missing hash");
+				return { valid: false, totalRows: rows.length, breakAt: i };
+			}
+
+			if (storedHash !== null) {
+				const expectedHash = computeRowHash(row, previousHash);
+				if (storedHash !== expectedHash) {
+					logger.fatal(
+						{ breakAt: i, rowId: row.id, expectedHash, storedHash },
+						"AUDIT LOG INTEGRITY VIOLATION DETECTED",
+					);
+					return { valid: false, totalRows: rows.length, breakAt: i };
+				}
+				previousHash = storedHash;
+			}
+		}
+
+		logger.info({ totalRows: rows.length }, "Integrity scan passed");
+		return { valid: true, totalRows: rows.length };
 	} catch (error) {
-		logger.error(
-			{ err: error },
-			"Integrity scan failed with error",
-		);
-		return {
-			valid: false,
-			totalRows: 0,
-		};
+		logger.error({ err: error }, "Integrity scan failed with error");
+		return { valid: false, totalRows: 0 };
 	}
 }

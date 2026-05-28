@@ -119,7 +119,7 @@ async function getActiveDeployments(): Promise<Array<{ deploymentId: string; app
 
 		return rows.map((r) => ({
 			deploymentId: r.deploymentId,
-			appName: extractAppNameFromLogPath(r.logPath),
+			appName: extractAppNameFromLogPath(r.logPath ?? r.deploymentId),
 			status: r.status,
 		}));
 	} catch (error) {
@@ -132,7 +132,7 @@ function extractAppNameFromLogPath(logPath: string): string {
 	const parts = logPath.split("/");
 	const logsIdx = parts.lastIndexOf("logs");
 	if (logsIdx >= 0 && parts.length > logsIdx + 1) {
-		return parts[logsIdx + 1];
+		return parts[logsIdx + 1] ?? logPath;
 	}
 	return logPath;
 }

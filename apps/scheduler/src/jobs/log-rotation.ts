@@ -7,11 +7,8 @@ import {
 	db,
 	deployments,
 	eq,
+	isNull,
 } from "@undevops/server/db";
-import { isNull } from "drizzle-orm";
-import { execAsync } from "@undevops/server/utils/process/execAsync";
-import { getS3Credentials } from "@undevops/server/utils/backups/utils";
-import type { Destination } from "@undevops/server/services/destination";
 import { logger } from "../logger.js";
 
 export interface RotationResult {
@@ -29,15 +26,12 @@ async function gzipFile(inputPath: string, outputPath: string): Promise<void> {
 	await pipeline(source, gzip, dest);
 }
 
-async function uploadToS3(
-	localGzPath: string,
-	s3Key: string,
-	destination: Destination,
-): Promise<void> {
-	const rcloneFlags = getS3Credentials(destination);
-	const rcloneDestination = `:s3:${destination.bucket}/${s3Key}`;
-	const command = `rclone copyto ${rcloneFlags.join(" ")} "${localGzPath}" "${rcloneDestination}"`;
-	await execAsync(command);
+async function uploadToS3(localGzPath: string, s3Key: string, bucket: string): Promise<void> {
+	const { execFile } = await import("node:child_process");
+	const { promisify } = await import("node:util");
+	const execAsync = promisify(execFile);
+	const rcloneDest = `:s3:${bucket}/${s3Key}`;
+	await execAsync("rclone", ["copyto", localGzPath, rcloneDest]);
 }
 
 export async function rotateDeploymentLogs(): Promise<RotationResult> {
@@ -50,8 +44,6 @@ export async function rotateDeploymentLogs(): Promise<RotationResult> {
 	}
 	const destination = destinationsList[0];
 
-	const cutoffDate = new Date(Date.now() - GRACE_PERIOD_MS);
-
 	const staleDeployments = await db
 		.select({
 			deploymentId: deployments.deploymentId,
@@ -60,9 +52,7 @@ export async function rotateDeploymentLogs(): Promise<RotationResult> {
 			finishedAt: deployments.finishedAt,
 		})
 		.from(deployments)
-		.where(
-			isNull(deployments.logUri),
-		)
+		.where(isNull(deployments.logUri))
 		.limit(500);
 
 	for (const deployment of staleDeployments) {
@@ -72,7 +62,7 @@ export async function rotateDeploymentLogs(): Promise<RotationResult> {
 			continue;
 		}
 
-		if (finishedAt && new Date(finishedAt).getTime() > cutoffDate.getTime()) {
+		if (finishedAt && new Date(finishedAt).getTime() > Date.now() - GRACE_PERIOD_MS) {
 			continue;
 		}
 
@@ -87,7 +77,7 @@ export async function rotateDeploymentLogs(): Promise<RotationResult> {
 			const s3Key = `logs/${deploymentId}/${timestamp}.log.gz`;
 
 			await gzipFile(logPath, gzPath);
-			await uploadToS3(gzPath, s3Key, destination);
+			await uploadToS3(gzPath, s3Key, destination.bucket);
 
 			const s3Uri = `s3://${destination.bucket}/${s3Key}`;
 			await db
