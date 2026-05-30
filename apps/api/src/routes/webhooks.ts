@@ -105,7 +105,12 @@ webhooks.post("/gitlab", async (c) => {
 		return c.json({ error: "Invalid token" }, 401);
 	}
 
-	const body = await c.req.json();
+	let body: unknown;
+	try {
+		body = await c.req.json();
+	} catch {
+		return c.json({ error: "Invalid JSON format" }, 400);
+	}
 	const parsed = gitlabWebhookSchema.safeParse(body);
 	if (!parsed.success) {
 		return c.json({ error: "Invalid payload", details: parsed.error.flatten() }, 400);

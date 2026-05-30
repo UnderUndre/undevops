@@ -11,7 +11,7 @@ const inspectInputSchema = {
 	includeHealthHistory: z.boolean().default(false).optional(),
 };
 
-async function handleInspect(input: Record<string, unknown>, _ctx: ToolContext): Promise<Record<string, unknown>> {
+async function handleInspect(input: Record<string, unknown>, ctx: ToolContext): Promise<Record<string, unknown>> {
 	const deploymentId = input.deploymentId as string;
 
 	const deployRows = await db.select().from(deployments).where(eq(deployments.deploymentId, deploymentId)).limit(1);
@@ -19,6 +19,13 @@ async function handleInspect(input: Record<string, unknown>, _ctx: ToolContext):
 
 	if (!deployment) {
 		throw new McpError(ERROR_CODES.NOT_FOUND, `Deployment '${deploymentId}' not found`);
+	}
+
+	if (ctx.targetId) {
+		const app = await resolveApplicationForProject(ctx.targetId);
+		if (deployment.applicationId !== app.applicationId) {
+			throw new McpError(ERROR_CODES.INSUFFICIENT_SCOPE, `Token scoped to '${ctx.targetId}', cannot inspect deployment '${deploymentId}'`);
+		}
 	}
 
 	const result: Record<string, unknown> = {
@@ -60,14 +67,18 @@ const getLogsInputSchema = {
 	follow: z.boolean().default(false).optional(),
 };
 
-async function handleGetLogs(input: Record<string, unknown>, _ctx: ToolContext): Promise<Record<string, unknown>> {
+async function handleGetLogs(input: Record<string, unknown>, ctx: ToolContext): Promise<Record<string, unknown>> {
 	const projectId = input.projectId as string;
 	let deploymentId = input.deploymentId as string | undefined;
 	const lines = (input.lines as number) ?? 100;
 
-	if (!deploymentId) {
-		const app = await resolveApplicationForProject(projectId);
+	if (ctx.targetId && projectId !== ctx.targetId) {
+		throw new McpError(ERROR_CODES.INSUFFICIENT_SCOPE, `Token scoped to '${ctx.targetId}', cannot get logs for '${projectId}'`);
+	}
 
+	const app = await resolveApplicationForProject(projectId);
+
+	if (!deploymentId) {
 		const latestDeploys = await db
 			.select({ deploymentId: deployments.deploymentId, logPath: deployments.logPath })
 			.from(deployments)
@@ -91,6 +102,10 @@ async function handleGetLogs(input: Record<string, unknown>, _ctx: ToolContext):
 	const deployment = deployRows[0];
 	if (!deployment) {
 		throw new McpError(ERROR_CODES.NOT_FOUND, `Deployment '${deploymentId}' not found`);
+	}
+
+	if (deployment.applicationId !== app.applicationId) {
+		throw new McpError(ERROR_CODES.INSUFFICIENT_SCOPE, `Deployment '${deploymentId}' does not belong to project '${projectId}'`);
 	}
 
 	if (!deployment.logPath) {

@@ -9,6 +9,7 @@ import {
 	eq,
 	isNull,
 } from "@undevops/server/db";
+import { getS3Credentials } from "@undevops/server";
 import { logger } from "../logger.js";
 
 export interface RotationResult {
@@ -26,12 +27,13 @@ async function gzipFile(inputPath: string, outputPath: string): Promise<void> {
 	await pipeline(source, gzip, dest);
 }
 
-async function uploadToS3(localGzPath: string, s3Key: string, bucket: string): Promise<void> {
+async function uploadToS3(localGzPath: string, s3Key: string, destination: any): Promise<void> {
 	const { execFile } = await import("node:child_process");
 	const { promisify } = await import("node:util");
 	const execAsync = promisify(execFile);
-	const rcloneDest = `:s3:${bucket}/${s3Key}`;
-	await execAsync("rclone", ["copyto", localGzPath, rcloneDest]);
+	const rcloneFlags = getS3Credentials(destination).map(flag => flag.replace(/="([^"]*)"$/, '=$1'));
+	const rcloneDest = `:s3:${destination.bucket}/${s3Key}`;
+	await execAsync("rclone", ["copyto", ...rcloneFlags, localGzPath, rcloneDest]);
 }
 
 export async function rotateDeploymentLogs(): Promise<RotationResult> {
@@ -83,7 +85,7 @@ export async function rotateDeploymentLogs(): Promise<RotationResult> {
 			const s3Key = `logs/${deploymentId}/${timestamp}.log.gz`;
 
 			await gzipFile(logPath, gzPath);
-			await uploadToS3(gzPath, s3Key, destination.bucket);
+			await uploadToS3(gzPath, s3Key, destination);
 
 			const s3Uri = `s3://${destination.bucket}/${s3Key}`;
 			await db

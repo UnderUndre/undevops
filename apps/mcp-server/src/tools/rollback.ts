@@ -41,7 +41,10 @@ async function handleRollback(input: Record<string, unknown>, ctx: ToolContext):
 	const targetDeploy = await db
 		.select({ deploymentId: deployments.deploymentId })
 		.from(deployments)
-		.where(eq(deployments.deploymentId, targetDeploymentId))
+		.where(and(
+			eq(deployments.deploymentId, targetDeploymentId),
+			eq(deployments.applicationId, app.applicationId)
+		))
 		.limit(1);
 
 	if (!targetDeploy[0]) {

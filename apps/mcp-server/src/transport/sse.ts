@@ -117,15 +117,19 @@ export async function startSseServer(mcpServer: McpServer, port: number, host = 
 			let body = "";
 			let bodySize = 0;
 			const MAX_BODY_SIZE = 1024 * 1024; // 1MB limit
-			for await (const chunk of req) {
-				bodySize += chunk.length;
-				if (bodySize > MAX_BODY_SIZE) {
-					res.writeHead(413, { "Content-Type": "application/json" });
-					res.end(JSON.stringify({ error: "Payload Too Large" }));
-					req.destroy();
-					return;
+			try {
+				for await (const chunk of req) {
+					bodySize += chunk.length;
+					if (bodySize > MAX_BODY_SIZE) {
+						res.writeHead(413, { "Content-Type": "application/json" });
+						res.end(JSON.stringify({ error: "Payload Too Large" }));
+						req.destroy();
+						return;
+					}
+					body += chunk;
 				}
-				body += chunk;
+			} catch {
+				return;
 			}
 
 			const sessionId = url.searchParams.get("sessionId") ?? "";
