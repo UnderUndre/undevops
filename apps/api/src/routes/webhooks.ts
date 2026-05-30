@@ -69,7 +69,14 @@ webhooks.post("/github", async (c) => {
 		return c.json({ error: "Invalid signature" }, 401);
 	}
 
-	const parsed = githubWebhookSchema.safeParse(JSON.parse(body));
+	let jsonPayload: unknown;
+	try {
+		jsonPayload = JSON.parse(body);
+	} catch {
+		return c.json({ error: "Invalid JSON format" }, 400);
+	}
+
+	const parsed = githubWebhookSchema.safeParse(jsonPayload);
 	if (!parsed.success) {
 		return c.json({ error: "Invalid payload", details: parsed.error.flatten() }, 400);
 	}
@@ -125,7 +132,14 @@ webhooks.post("/bitbucket", async (c) => {
 		return c.json({ error: "Invalid signature" }, 401);
 	}
 
-	const parsed = bitbucketWebhookSchema.safeParse(JSON.parse(body));
+	let jsonPayload: unknown;
+	try {
+		jsonPayload = JSON.parse(body);
+	} catch {
+		return c.json({ error: "Invalid JSON format" }, 400);
+	}
+
+	const parsed = bitbucketWebhookSchema.safeParse(jsonPayload);
 	if (!parsed.success) {
 		return c.json({ error: "Invalid payload", details: parsed.error.flatten() }, 400);
 	}

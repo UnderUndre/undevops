@@ -50,15 +50,20 @@ export async function rotateDeploymentLogs(): Promise<RotationResult> {
 			logPath: deployments.logPath,
 			logUri: deployments.logUri,
 			finishedAt: deployments.finishedAt,
+			status: deployments.status,
 		})
 		.from(deployments)
 		.where(isNull(deployments.logUri))
 		.limit(500);
 
 	for (const deployment of staleDeployments) {
-		const { logPath, deploymentId, finishedAt } = deployment;
+		const { logPath, deploymentId, finishedAt, status } = deployment;
 
 		if (!logPath || !existsSync(logPath)) {
+			continue;
+		}
+
+		if (status === "running") {
 			continue;
 		}
 

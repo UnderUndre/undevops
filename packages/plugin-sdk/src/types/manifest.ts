@@ -59,7 +59,7 @@ export const pluginManifestSchema = z.object({
 	license: z.string().optional(),
 	homepage: z.string().url().optional(),
 	sdkVersion: z.string().regex(/^\^\d+\.\d+\.\d+$/),
-	hooks: z.array(hookSchema),
+	hooks: z.array(hookSchema).default([]),
 	permissions: z.array(permissionEnum).default([]),
 	config: pluginConfigSchema.optional(),
 	settings: z.array(settingSchema).default([]),

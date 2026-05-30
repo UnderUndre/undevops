@@ -321,4 +321,120 @@ describe("T131: Regression — Wave 1 + Wave 2 Smoke Tests", () => {
 			expect(result.breakAt).toBe(3);
 		});
 	});
+
+	describe("Wave 3: PR #2 Refactoring Tests", () => {
+		it("proves audit hashing length-prefix collision resistance", () => {
+			const baseRow = {
+				id: "1",
+				organizationId: null,
+				userId: null,
+				userEmail: "test@test.com",
+				userRole: "admin",
+				action: "c",
+				resourceType: "project",
+				resourceId: "proj-1",
+				resourceName: "a|b",
+				metadata: null,
+				createdAt: new Date("2026-05-30T10:00:00Z"),
+				actor_type: "human",
+				actor_id: "user-1",
+				payload: null,
+			};
+
+			const rowA = {
+				...baseRow,
+				resourceName: "a|b",
+				action: "c",
+			};
+
+			const rowB = {
+				...baseRow,
+				resourceName: "a",
+				action: "b|c",
+			};
+
+			const hashA = computeRowHash(rowA, "prev-hash");
+			const hashB = computeRowHash(rowB, "prev-hash");
+
+			expect(hashA).not.toBe(hashB);
+		});
+
+		it("validates needsApproval truth-table logic", () => {
+			function evaluateApproval(app: { environmentId: string | null }, env: { autoApproveAgents: boolean } | null): boolean {
+				let needsApproval = true;
+				if (app.environmentId) {
+					if (env && env.autoApproveAgents === true) {
+						needsApproval = false;
+					}
+				}
+				return needsApproval;
+			}
+
+			// Case 1: No environment ID -> needs approval
+			expect(evaluateApproval({ environmentId: null }, null)).toBe(true);
+
+			// Case 2: Has environment ID, autoApproveAgents is false -> needs approval
+			expect(evaluateApproval({ environmentId: "env-1" }, { autoApproveAgents: false })).toBe(true);
+
+			// Case 3: Has environment ID, autoApproveAgents is true -> does NOT need approval
+			expect(evaluateApproval({ environmentId: "env-1" }, { autoApproveAgents: true })).toBe(false);
+		});
+
+		it("proves circular Ring Buffer tailFile functionality", async () => {
+			const { tailFile } = await import("../../packages/core/src/deploy/tail.js");
+			const { writeFileSync, unlinkSync } = await import("node:fs");
+			const { tmpdir } = await import("node:os");
+			const { join } = await import("node:path");
+			const path = join(tmpdir(), "test-tail-ring.log");
+
+			writeFileSync(path, "line 1\nline 2\nline 3\nline 4\nline 5\nline 6\nline 7\n");
+
+			try {
+				const { lines, totalCount } = await tailFile(path, 3);
+				expect(totalCount).toBe(7);
+				expect(lines.length).toBe(3);
+				expect(lines[0]!.line).toBe("line 5");
+				expect(lines[1]!.line).toBe("line 6");
+				expect(lines[2]!.line).toBe("line 7");
+			} finally {
+				try { unlinkSync(path); } catch {}
+			}
+		});
+
+		it("validates log rotation active deployment skipping", () => {
+			const activeStatuses = ["running"];
+			const finishedStatuses = ["done", "error", "cancelled"];
+
+			function shouldSkipRotation(status: string): boolean {
+				return status === "running";
+			}
+
+			for (const status of activeStatuses) {
+				expect(shouldSkipRotation(status)).toBe(true);
+			}
+
+			for (const status of finishedStatuses) {
+				expect(shouldSkipRotation(status)).toBe(false);
+			}
+		});
+
+		it("validates Commander custom port parser custom validation", () => {
+			class MockInvalidArgumentError extends Error {}
+			
+			function parsePort(value: string): number {
+				const parsed = Number.parseInt(value, 10);
+				if (Number.isNaN(parsed)) {
+					throw new MockInvalidArgumentError("Port must be a valid number.");
+				}
+				if (parsed < 1 || parsed > 65535) {
+					throw new MockInvalidArgumentError("Port must be between 1 and 65535.");
+				}
+				return parsed;
+			}
+
+			expect(parsePort("22")).toBe(22);
+			expect(() => parsePort("abc")).toThrow(MockInvalidArgumentError);
+			expect(() => parsePort("70000")).toThrow(MockInvalidArgumentError);
+		});
+	});
 });

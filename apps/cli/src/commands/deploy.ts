@@ -3,8 +3,8 @@ import { db } from "@undevops/server/db";
 import { deployments } from "@undevops/server/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { getFormatter } from "../output/formatter.js";
-import { createReadStream, existsSync } from "node:fs";
-import { createInterface } from "node:readline";
+import { existsSync } from "node:fs";
+import { tailFile } from "@undevops/core";
 
 export const deployCommand = new Command("deploy")
 	.description("Deployment operations");
@@ -57,17 +57,9 @@ deploymentCommand.command("logs")
 		}
 
 		const tail = Number.parseInt(opts.tail, 10);
-		const lines: string[] = [];
-		const stream = createReadStream(row.logPath, { encoding: "utf8" });
-		const rl = createInterface({ input: stream, crlfDelay: Infinity });
-
-		for await (const line of rl) {
-			lines.push(line);
-		}
-
-		const output = lines.slice(-tail);
-		for (const line of output) {
-			console.log(line);
+		const { lines } = await tailFile(row.logPath, tail);
+		for (const entry of lines) {
+			console.log(entry.line);
 		}
 	});
 

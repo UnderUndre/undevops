@@ -1,8 +1,19 @@
-import { Command } from "commander";
+import { Command, InvalidArgumentError } from "commander";
 import { db } from "@undevops/server/db";
 import { server } from "@undevops/server/db/schema";
 import { eq } from "drizzle-orm";
 import { getFormatter } from "../output/formatter.js";
+
+function parsePort(value: string): number {
+	const parsed = Number.parseInt(value, 10);
+	if (Number.isNaN(parsed)) {
+		throw new InvalidArgumentError("Port must be a valid number.");
+	}
+	if (parsed < 1 || parsed > 65535) {
+		throw new InvalidArgumentError("Port must be between 1 and 65535.");
+	}
+	return parsed;
+}
 
 export const serverCommand = new Command("server")
 	.description("Manage servers");
@@ -27,7 +38,7 @@ serverCommand.command("add")
 	.description("Add a server")
 	.requiredOption("--name <name>", "Server name")
 	.requiredOption("--ip <ip>", "IP address")
-	.requiredOption("--port <port>", "SSH port", Number.parseInt)
+	.requiredOption("--port <port>", "SSH port", parsePort)
 	.option("--username <username>", "SSH username", "root")
 	.option("--ssh-key-id <id>", "SSH key ID")
 	.option("--type <type>", "Server type (deploy|build)", "deploy")

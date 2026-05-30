@@ -78,16 +78,19 @@ async function handleDeploy(input: Record<string, unknown>, ctx: ToolContext): P
 		createdAt: new Date().toISOString(),
 	});
 
-	const needsApproval = !app.environmentId ? true : (async () => {
+	let needsApproval = true;
+	if (app.environmentId) {
 		const envRows = await db
 			.select({ autoApproveAgents: environments.autoApproveAgents })
 			.from(environments)
-			.where(eq(environments.environmentId, app.environmentId!))
+			.where(eq(environments.environmentId, app.environmentId))
 			.limit(1);
-		return envRows[0]?.autoApproveAgents !== true;
-	})();
+		if (envRows.length > 0 && envRows[0].autoApproveAgents === true) {
+			needsApproval = false;
+		}
+	}
 
-	if (await needsApproval) {
+	if (needsApproval) {
 		await db.insert(pendingAgentActions).values({
 			actionId: nanoid(),
 			mcpClientId: ctx.clientId,

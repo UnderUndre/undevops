@@ -28,12 +28,48 @@ export interface IntegrityAlert {
 	timestamp: string;
 }
 
+function serializeValue(val: unknown): string {
+	if (val === null || val === undefined) {
+		return "0:";
+	}
+	if (val instanceof Date) {
+		const s = val.toISOString();
+		return `${s.length}:${s}`;
+	}
+	if (typeof val === "object") {
+		const sortedStr = JSON.stringify(val, Object.keys(val as Record<string, unknown>).sort());
+		return `${sortedStr.length}:${sortedStr}`;
+	}
+	const s = String(val);
+	return `${s.length}:${s}`;
+}
+
 export function computeRowHash(
-	row: AuditLogRow,
+	row: any,
 	previousHash: string | null,
 ): string {
 	const { row_hash, previous_hash, ...data } = row;
-	const payload = `${previousHash ?? ""}:${JSON.stringify(data)}`;
+	const fields = [
+		"action",
+		"actor_id",
+		"actor_type",
+		"createdAt",
+		"id",
+		"metadata",
+		"organizationId",
+		"payload",
+		"resourceId",
+		"resourceName",
+		"resourceType",
+		"userEmail",
+		"userId",
+		"userRole"
+	];
+
+	let payload = previousHash ?? "";
+	for (const field of fields) {
+		payload += "|" + serializeValue(data[field]);
+	}
 	return createHash("sha256").update(payload).digest("hex");
 }
 

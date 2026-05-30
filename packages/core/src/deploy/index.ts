@@ -80,3 +80,9 @@ export {
   getLogContent,
   type S3Config,
 } from "./log-store";
+
+export {
+  tailFile,
+  type TailedLines,
+} from "./tail";
+

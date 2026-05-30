@@ -1,8 +1,7 @@
 import { stat } from "node:fs/promises";
-import { createReadStream } from "node:fs";
-import { createInterface } from "node:readline";
 import { redactString } from "../redaction.js";
 import { createLogger } from "../lib/logger.js";
+import { tailFile } from "@undevops/core";
 
 const logger = createLogger("undevops:mcp:resources:logs");
 
@@ -62,24 +61,13 @@ export async function readDeploymentLogs(options: ReadLogsOptions) {
 		return { lines: [], total: 0, filtered: 0, truncated: false };
 	}
 
-	const allLines: LogEntry[] = [];
-	let lineNum = 0;
+	const { lines, totalCount } = await tailFile(logPath, maxLines);
 
-	const rl = createInterface({
-		input: createReadStream(logPath, { encoding: "utf-8" }),
-		crlfDelay: Infinity,
-	});
+	const parsedLines = lines.map((l) => parseLogLine(l.line, l.lineNum));
 
-	for await (const line of rl) {
-		if (line.trim().length === 0) continue;
-		lineNum++;
-		allLines.push(parseLogLine(line, lineNum));
-	}
-
-	const tailSlice = allLines.slice(-maxLines);
 	const filtered = level || search || since
-		? tailSlice.filter((e) => matchesFilters(e, level, search, since))
-		: tailSlice;
+		? parsedLines.filter((e) => matchesFilters(e, level, search, since))
+		: parsedLines;
 
 	const redactedLines = filtered.map((entry) => ({
 		...entry,
@@ -91,15 +79,15 @@ export async function readDeploymentLogs(options: ReadLogsOptions) {
 	logger.info({
 		elapsed: Math.round(elapsed),
 		deploymentId,
-		total: allLines.length,
-		tail: tailSlice.length,
+		total: totalCount,
+		tail: lines.length,
 		filtered: redactedLines.length,
 	}, "readDeploymentLogs");
 
 	return {
 		lines: redactedLines,
-		total: allLines.length,
+		total: totalCount,
 		filtered: redactedLines.length,
-		truncated: allLines.length > maxLines,
+		truncated: totalCount > maxLines,
 	};
 }
