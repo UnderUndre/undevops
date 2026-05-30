@@ -67,7 +67,8 @@ export async function rotateDeploymentLogs(): Promise<RotationResult> {
 			continue;
 		}
 
-		if (finishedAt && new Date(finishedAt).getTime() > Date.now() - GRACE_PERIOD_MS) {
+		const finishedTime = finishedAt ? new Date(finishedAt).getTime() : 0;
+		if (finishedTime > 0 && finishedTime > Date.now() - GRACE_PERIOD_MS) {
 			continue;
 		}
 

@@ -70,6 +70,9 @@ envCommand.command("list")
 
 		const vars = (row.env || "").split("\n").filter(Boolean).map((line: string) => {
 			const eqIdx = line.indexOf("=");
+			if (eqIdx === -1) {
+				return { key: line, value: "" };
+			}
 			return { key: line.slice(0, eqIdx), value: line.slice(eqIdx + 1) };
 		});
 
@@ -97,7 +100,7 @@ envCommand.command("unset [keys...]")
 
 		const lines = (row.env || "").split("\n").filter((l: string) => {
 			const eqIdx = l.indexOf("=");
-			const key = l.slice(0, eqIdx);
+			const key = eqIdx === -1 ? l : l.slice(0, eqIdx);
 			return !keys.includes(key);
 		});
 

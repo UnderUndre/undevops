@@ -1,6 +1,10 @@
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
+import { spawn } from "node:child_process";
+import { createReadStream, createWriteStream, statSync } from "node:fs";
+import { mkdtemp, rm } from "node:fs/promises";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
 import { createCipheriv, randomBytes, scryptSync } from "node:crypto";
+import { finished } from "node:stream/promises";
 import {
 	S3Client,
 	PutObjectCommand,
@@ -9,7 +13,7 @@ import {
 import { logger } from "../logger.js";
 
 const BACKUP_KEY_LENGTH = 32;
-const BACKUP_IV_LENGTH = 16;
+const BACKUP_IV_LENGTH = 12; // Standard 12-byte nonce for GCM
 const BACKUP_AUTH_TAG_LENGTH = 16;
 
 function getBackupEncryptionKey(): Buffer {
@@ -17,17 +21,6 @@ function getBackupEncryptionKey(): Buffer {
 	if (!key) throw new Error("UNDEVOPS_BACKUP_ENCRYPTION_KEY environment variable is not set");
 	return scryptSync(key, "undevops-backup-salt", BACKUP_KEY_LENGTH);
 }
-
-function encryptBuffer(buffer: Buffer): { encrypted: Buffer; iv: string; tag: string } {
-	const key = getBackupEncryptionKey();
-	const iv = randomBytes(BACKUP_IV_LENGTH);
-	const cipher = createCipheriv("aes-256-gcm", key, iv, { authTagLength: BACKUP_AUTH_TAG_LENGTH });
-	const encrypted = Buffer.concat([cipher.update(buffer), cipher.final()]);
-	const tag = cipher.getAuthTag();
-	return { encrypted, iv: iv.toString("base64"), tag: tag.toString("base64") };
-}
-
-const execFileAsync = promisify(execFile);
 
 export interface BackupConfig {
 	s3Endpoint: string;
@@ -62,63 +55,99 @@ async function getS3Client(config: BackupConfig): Promise<S3Client> {
 	return new S3Client(clientConfig);
 }
 
-async function runPgDump(databaseUrl: string): Promise<Buffer> {
-	const { stdout } = await execFileAsync(
-		"pg_dump",
-		["--single-transaction", "--format=custom", "--dbname", databaseUrl],
-		{
-			maxBuffer: 1024 * 1024 * 1024,
-			encoding: "buffer",
-		},
-	);
-	return Buffer.isBuffer(stdout) ? stdout : Buffer.from(stdout);
-}
-
 export async function runControlPlaneBackup(
 	config: BackupConfig,
 ): Promise<BackupResult> {
 	const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 	const s3Key = `${config.s3PathPrefix}control-plane-${timestamp}.enc`;
 
+	const tmpDir = await mkdtemp(join(tmpdir(), "undevops-backup-"));
+	const encPath = join(tmpDir, "enc.dump");
+	const finalPath = join(tmpDir, "final.enc");
+
 	try {
-		logger.info({ s3Key }, "Starting control-plane backup");
+		logger.info({ s3Key }, "Starting control-plane backup streaming");
 
-		const rawDump = await runPgDump(config.databaseUrl);
-		logger.info(
-			{ sizeBytes: rawDump.length },
-			"pg_dump completed, encrypting",
-		);
+		const iv = randomBytes(BACKUP_IV_LENGTH);
+		const cipher = createCipheriv("aes-256-gcm", getBackupEncryptionKey(), iv, {
+			authTagLength: BACKUP_AUTH_TAG_LENGTH,
+		});
 
-		const { encrypted, iv, tag } = await encryptBuffer(rawDump);
-
-		const ivTagHeader = Buffer.concat([
-			Buffer.from(iv, "base64"),
-			Buffer.from(tag, "base64"),
+		const child = spawn("pg_dump", [
+			"--single-transaction",
+			"--format=custom",
+			"--dbname",
+			config.databaseUrl,
 		]);
-		const payload = Buffer.concat([ivTagHeader, encrypted]);
+
+		const encStream = createWriteStream(encPath);
+		child.stdout.pipe(cipher).pipe(encStream);
+
+		let stderrMsg = "";
+		child.stderr.on("data", (chunk) => {
+			stderrMsg += chunk.toString();
+		});
+
+		const childExitPromise = new Promise<void>((resolve, reject) => {
+			child.on("close", (code) => {
+				if (code !== 0) {
+					reject(new Error(`pg_dump failed with exit code ${code}: ${stderrMsg}`));
+				} else {
+					resolve();
+				}
+			});
+			child.on("error", (err) => {
+				reject(err);
+			});
+		});
+
+		// Wait for both stdout pipe mapping and exit code checking
+		await finished(encStream);
+		await childExitPromise;
+
+		const tag = cipher.getAuthTag();
+
+		// Construct final payload in O(1) memory: [IV 12 bytes] + [Encrypted Data] + [Tag 16 bytes]
+		const finalStream = createWriteStream(finalPath);
+		finalStream.write(iv);
+
+		const readEncStream = createReadStream(encPath);
+		for await (const chunk of readEncStream) {
+			finalStream.write(chunk);
+		}
+		finalStream.write(tag);
+		finalStream.end();
+
+		await new Promise<void>((resolve, reject) => {
+			finalStream.on("finish", () => resolve());
+			finalStream.on("error", (err) => reject(err));
+		});
+
+		const sizeBytes = statSync(finalPath).size;
 
 		const s3 = await getS3Client(config);
 		await s3.send(
 			new PutObjectCommand({
 				Bucket: config.s3Bucket,
 				Key: s3Key,
-				Body: payload,
+				Body: createReadStream(finalPath),
+				ContentLength: sizeBytes,
 				Metadata: {
-					"encryption-iv": iv,
-					"encryption-tag": tag,
+					"encryption-iv": iv.toString("base64"),
+					"encryption-tag": tag.toString("base64"),
 					"backup-timestamp": timestamp,
 				},
 			}),
 		);
 
 		logger.info(
-			{ s3Key, sizeBytes: payload.length },
-			"Control-plane backup uploaded",
+			{ s3Key, sizeBytes },
+			"Control-plane backup stream uploaded to S3",
 		);
 
 		return {
 			s3Key,
-			sizeBytes: payload.length,
+			sizeBytes,
 			timestamp,
 			status: "success",
 		};
@@ -136,5 +165,10 @@ export async function runControlPlaneBackup(
 			status: "failed",
 			error: message,
 		};
+	} finally {
+		// Guaranteed cleanup of all secure temp files on exit / crash
+		await rm(tmpDir, { recursive: true, force: true }).catch((err) => {
+			logger.error({ err: err.message }, "Error cleaning up temporary backup files");
+		});
 	}
 }

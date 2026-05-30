@@ -99,7 +99,9 @@ webhooks.post("/gitlab", async (c) => {
 		return c.json({ error: "Webhook not configured" }, 500);
 	}
 
-	if (token !== secret) {
+	const tokenHash = createHmac("sha256", secret).update(token).digest();
+	const secretHash = createHmac("sha256", secret).update(secret).digest();
+	if (!timingSafeEqual(tokenHash, secretHash)) {
 		return c.json({ error: "Invalid token" }, 401);
 	}
 

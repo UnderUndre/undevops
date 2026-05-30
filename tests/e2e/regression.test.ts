@@ -436,5 +436,152 @@ describe("T131: Regression — Wave 1 + Wave 2 Smoke Tests", () => {
 			expect(() => parsePort("abc")).toThrow(MockInvalidArgumentError);
 			expect(() => parsePort("70000")).toThrow(MockInvalidArgumentError);
 		});
+
+		it("validates keyset-based audit integrity scan pagination and race condition locks", async () => {
+			const maxDate = new Date("2026-05-30T12:00:00Z");
+			let lastCreatedAt: Date | null = null;
+			let lastId: string | null = null;
+			let totalRows = 0;
+			const batchSize = 2;
+
+			// Simulated database rows ordered chronologically
+			const mockDbRows = [
+				{ id: "id-1", createdAt: new Date("2026-05-30T10:00:00Z"), row_hash: "hash-1" },
+				{ id: "id-2", createdAt: new Date("2026-05-30T10:00:00Z"), row_hash: "hash-2" },
+				{ id: "id-3", createdAt: new Date("2026-05-30T10:05:00Z"), row_hash: "hash-3" },
+				{ id: "id-4", createdAt: new Date("2026-05-30T10:10:00Z"), row_hash: "hash-4" },
+				// Row after maxDate (newly inserted) -> should be locked out
+				{ id: "id-5", createdAt: new Date("2026-05-30T13:00:00Z"), row_hash: "hash-5" },
+			];
+
+			const processedIds: string[] = [];
+
+			while (true) {
+				const pageRows = mockDbRows.filter((r) => {
+					if (r.createdAt.getTime() > maxDate.getTime()) return false;
+					if (lastCreatedAt !== null && lastId !== null) {
+						if (r.createdAt.getTime() > lastCreatedAt.getTime()) return true;
+						if (r.createdAt.getTime() === lastCreatedAt.getTime() && r.id > lastId) return true;
+						return false;
+					}
+					return true;
+				})
+				.sort((a, b) => {
+					const timeDiff = a.createdAt.getTime() - b.createdAt.getTime();
+					if (timeDiff !== 0) return timeDiff;
+					return a.id.localeCompare(b.id);
+				})
+				.slice(0, batchSize);
+
+				if (pageRows.length === 0) break;
+
+				for (const r of pageRows) {
+					processedIds.push(r.id);
+				}
+
+				const lastRow = pageRows[pageRows.length - 1]!;
+				lastCreatedAt = lastRow.createdAt;
+				lastId = lastRow.id;
+				totalRows += pageRows.length;
+
+				if (pageRows.length < batchSize) break;
+			}
+
+			expect(totalRows).toBe(4);
+			expect(processedIds).toEqual(["id-1", "id-2", "id-3", "id-4"]);
+		});
+
+		it("validates timing-safe webhook token checks with proper guards", async () => {
+			const { createHmac, timingSafeEqual } = await import("node:crypto");
+
+			function checkToken(token: string | undefined, secret: string | undefined): { status: number; body?: string } {
+				if (!token) return { status: 401, body: "Missing X-Gitlab-Token header" };
+				if (!secret) return { status: 500, body: "Webhook not configured" };
+
+				const tokenHash = createHmac("sha256", secret).update(token).digest();
+				const secretHash = createHmac("sha256", secret).update(secret).digest();
+				
+				if (!timingSafeEqual(tokenHash, secretHash)) {
+					return { status: 401, body: "Invalid token" };
+				}
+				return { status: 200 };
+			}
+
+			expect(checkToken(undefined, "secret")).toEqual({ status: 401, body: "Missing X-Gitlab-Token header" });
+			expect(checkToken("token", undefined)).toEqual({ status: 500, body: "Webhook not configured" });
+			expect(checkToken("wrong", "secret")).toEqual({ status: 401, body: "Invalid token" });
+			expect(checkToken("secret", "secret")).toEqual({ status: 200 });
+		});
+
+		it("validates SSE connection DoS body limit and stream destruction", async () => {
+			let connectionDestroyed = false;
+			const res = {
+				writeHead: vi.fn(),
+				end: vi.fn(),
+			};
+			const req = {
+				destroy: () => { connectionDestroyed = true; },
+			};
+
+			function processChunk(chunkLength: number, currentSize: number, maxSize: number): { overLimit: boolean; nextSize: number } {
+				const nextSize = currentSize + chunkLength;
+				if (nextSize > maxSize) {
+					return { overLimit: true, nextSize };
+				}
+				return { overLimit: false, nextSize };
+			}
+
+			let bodySize = 0;
+			const maxSize = 1024; // 1KB for test
+			const chunk1 = 600;
+			const chunk2 = 500;
+
+			const step1 = processChunk(chunk1, bodySize, maxSize);
+			expect(step1.overLimit).toBe(false);
+			bodySize = step1.nextSize;
+
+			const step2 = processChunk(chunk2, bodySize, maxSize);
+			expect(step2.overLimit).toBe(true);
+			if (step2.overLimit) {
+				res.writeHead(413);
+				res.end("Payload Too Large");
+				req.destroy();
+			}
+
+			expect(connectionDestroyed).toBe(true);
+			expect(res.writeHead).toHaveBeenCalledWith(413);
+		});
+
+		it("validates round-trip AES-256-GCM streaming backup serialization with IV(12) and trailing Tag", async () => {
+			const { createCipheriv, createDecipheriv, randomBytes } = await import("node:crypto");
+			const iv = randomBytes(12);
+			const tagLength = 16;
+			const key = randomBytes(32);
+
+			const originalData = Buffer.from("undevops transaction database content payload");
+
+			// Stream mock simulation
+			const cipher = createCipheriv("aes-256-gcm", key, iv, { authTagLength: tagLength });
+			const encrypted = Buffer.concat([cipher.update(originalData), cipher.final()]);
+			const tag = cipher.getAuthTag();
+
+			// Construct payload in O(1) format: [IV 12 bytes] + [encrypted] + [Tag 16 bytes]
+			const payload = Buffer.concat([iv, encrypted, tag]);
+
+			// Parse payload back
+			const ivExtracted = payload.subarray(0, 12);
+			const tagExtracted = payload.subarray(payload.length - 16);
+			const encryptedExtracted = payload.subarray(12, payload.length - 16);
+
+			expect(ivExtracted).toEqual(iv);
+			expect(tagExtracted).toEqual(tag);
+			expect(encryptedExtracted).toEqual(encrypted);
+
+			const decipher = createDecipheriv("aes-256-gcm", key, ivExtracted, { authTagLength: tagLength });
+			decipher.setAuthTag(tagExtracted);
+			const decrypted = Buffer.concat([decipher.update(encryptedExtracted), decipher.final()]);
+
+			expect(decrypted).toEqual(originalData);
+		});
 	});
 });

@@ -17,7 +17,7 @@ import { getFormatter } from "../output/formatter.js";
 
 const execFileAsync = promisify(execFile);
 
-const IV_LENGTH = 16;
+const IV_LENGTH = 12;
 const AUTH_TAG_LENGTH = 16;
 
 function getS3Client(opts: {
@@ -52,8 +52,8 @@ function parseEncryptedPayload(payload: Buffer): {
 	encrypted: Buffer;
 } {
 	const ivBuf = payload.subarray(0, IV_LENGTH);
-	const tagBuf = payload.subarray(IV_LENGTH, IV_LENGTH + AUTH_TAG_LENGTH);
-	const encrypted = payload.subarray(IV_LENGTH + AUTH_TAG_LENGTH);
+	const tagBuf = payload.subarray(payload.length - AUTH_TAG_LENGTH);
+	const encrypted = payload.subarray(IV_LENGTH, payload.length - AUTH_TAG_LENGTH);
 	return {
 		iv: ivBuf.toString("base64"),
 		tag: tagBuf.toString("base64"),
