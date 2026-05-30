@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-undevops}
       POSTGRES_DB: ${POSTGRES_DB:-undevops}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -20,7 +20,7 @@ services:
     image: redis:7-alpine
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -39,7 +39,7 @@ services:
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER:-undevops}:${POSTGRES_PASSWORD:-undevops}@postgres:5432/${POSTGRES_DB:-undevops}
       REDIS_URL: redis://redis:6379
-      NODE_ENV: dev
+      NODE_ENV: production
       NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
       UNDEVOPS_ENCRYPTION_KEY: ${UNDEVOPS_ENCRYPTION_KEY}
       UNDEVOPS_BACKUP_ENCRYPTION_KEY: ${UNDEVOPS_BACKUP_ENCRYPTION_KEY:-}
@@ -113,6 +113,7 @@ services:
       - "3001:3001"
     environment:
       PORT: "3001"
+      METRICS_CONFIG: ${METRICS_CONFIG}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 

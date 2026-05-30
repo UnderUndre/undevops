@@ -8,6 +8,24 @@ CREATE TYPE "public"."mcpTargetType" AS ENUM('organization', 'project', 'environ
 CREATE TYPE "public"."pendingActionStatus" AS ENUM('pending', 'approved', 'rejected', 'expired', 'cancelled');--> statement-breakpoint
 CREATE TYPE "public"."secretScopeType" AS ENUM('organization', 'project', 'environment', 'application', 'compose', 'ai_reviewer', 'plugin');--> statement-breakpoint
 CREATE TYPE "public"."verdictType" AS ENUM('pass', 'fail', 'abstain', 'error');--> statement-breakpoint
+CREATE TABLE "ai_reviewer" (
+	"aiReviewerId" text PRIMARY KEY NOT NULL,
+	"name" text NOT NULL,
+	"provider" "aiProviderType" NOT NULL,
+	"credentialRef" text NOT NULL,
+	"model" text NOT NULL,
+	"apiUrl" text,
+	"configJson" jsonb,
+	"timeout_seconds" integer DEFAULT 30 NOT NULL,
+	"isEnabled" boolean DEFAULT true NOT NULL,
+	"organizationId" text NOT NULL,
+	"createdBy" text,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp,
+	"last_invoked_at" timestamp,
+	"invoke_count" integer DEFAULT 0 NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "deployment_review_verdict" (
 	"verdictId" text PRIMARY KEY NOT NULL,
 	"deploymentId" text NOT NULL,
@@ -112,9 +130,13 @@ ALTER TABLE "plugin" ADD CONSTRAINT "plugin_organizationId_organization_id_fk" F
 ALTER TABLE "plugin" ADD CONSTRAINT "plugin_installedBy_user_id_fk" FOREIGN KEY ("installedBy") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "secret" ADD CONSTRAINT "secret_organizationId_organization_id_fk" FOREIGN KEY ("organizationId") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "secret" ADD CONSTRAINT "secret_createdBy_user_id_fk" FOREIGN KEY ("createdBy") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "ai_reviewer" ADD CONSTRAINT "ai_reviewer_organizationId_organization_id_fk" FOREIGN KEY ("organizationId") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "ai_reviewer" ADD CONSTRAINT "ai_reviewer_createdBy_user_id_fk" FOREIGN KEY ("createdBy") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "verdict_deploymentId_idx" ON "deployment_review_verdict" USING btree ("deploymentId");--> statement-breakpoint
 CREATE INDEX "verdict_aiReviewerId_idx" ON "deployment_review_verdict" USING btree ("aiReviewerId");--> statement-breakpoint
 CREATE UNIQUE INDEX "verdict_deployment_reviewer_unique" ON "deployment_review_verdict" USING btree ("deploymentId","aiReviewerId");--> statement-breakpoint
+CREATE INDEX "aiReviewer_organizationId_idx" ON "ai_reviewer" USING btree ("organizationId");--> statement-breakpoint
+CREATE INDEX "aiReviewer_provider_idx" ON "ai_reviewer" USING btree ("provider");--> statement-breakpoint
 CREATE INDEX "mcpClient_tokenHash_idx" ON "mcp_client" USING btree ("tokenHash");--> statement-breakpoint
 CREATE INDEX "mcpClient_organizationId_idx" ON "mcp_client" USING btree ("organizationId");--> statement-breakpoint
 CREATE INDEX "mcpClient_revokedAt_idx" ON "mcp_client" USING btree ("revoked_at");--> statement-breakpoint
