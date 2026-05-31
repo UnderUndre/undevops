@@ -1,36 +1,36 @@
 import { join } from "node:path";
-import { paths } from "@dokploy/server/constants";
-import { db } from "@dokploy/server/db";
+import { paths } from "@undevops/server/constants";
+import { db } from "@undevops/server/db";
 import {
 	type apiCreateCompose,
 	buildAppName,
 	cleanAppName,
 	compose,
-} from "@dokploy/server/db/schema";
-import { getBuildComposeCommand } from "@dokploy/server/utils/builders/compose";
-import { randomizeSpecificationFile } from "@dokploy/server/utils/docker/compose";
+} from "@undevops/server/db/schema";
+import { getBuildComposeCommand } from "@undevops/server/utils/builders/compose";
+import { randomizeSpecificationFile } from "@undevops/server/utils/docker/compose";
 import {
 	cloneCompose,
 	loadDockerCompose,
 	loadDockerComposeRemote,
-} from "@dokploy/server/utils/docker/domain";
-import type { ComposeSpecification } from "@dokploy/server/utils/docker/types";
-import { sendBuildErrorNotifications } from "@dokploy/server/utils/notifications/build-error";
-import { sendBuildSuccessNotifications } from "@dokploy/server/utils/notifications/build-success";
+} from "@undevops/server/utils/docker/domain";
+import type { ComposeSpecification } from "@undevops/server/utils/docker/types";
+import { sendBuildErrorNotifications } from "@undevops/server/utils/notifications/build-error";
+import { sendBuildSuccessNotifications } from "@undevops/server/utils/notifications/build-success";
 import {
 	ExecError,
 	execAsync,
 	execAsyncRemote,
-} from "@dokploy/server/utils/process/execAsync";
-import { cloneBitbucketRepository } from "@dokploy/server/utils/providers/bitbucket";
+} from "@undevops/server/utils/process/execAsync";
+import { cloneBitbucketRepository } from "@undevops/server/utils/providers/bitbucket";
 import {
 	cloneGitRepository,
 	getGitCommitInfo,
-} from "@dokploy/server/utils/providers/git";
-import { cloneGiteaRepository } from "@dokploy/server/utils/providers/gitea";
-import { cloneGithubRepository } from "@dokploy/server/utils/providers/github";
-import { cloneGitlabRepository } from "@dokploy/server/utils/providers/gitlab";
-import { getCreateComposeFileCommand } from "@dokploy/server/utils/providers/raw";
+} from "@undevops/server/utils/providers/git";
+import { cloneGiteaRepository } from "@undevops/server/utils/providers/gitea";
+import { cloneGithubRepository } from "@undevops/server/utils/providers/github";
+import { cloneGitlabRepository } from "@undevops/server/utils/providers/gitlab";
+import { getCreateComposeFileCommand } from "@undevops/server/utils/providers/raw";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import type { z } from "zod";

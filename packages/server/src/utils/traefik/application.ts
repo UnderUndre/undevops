@@ -1,8 +1,8 @@
 import fs, { createReadStream, writeFileSync } from "node:fs";
 import path from "node:path";
 import { createInterface } from "node:readline";
-import { paths } from "@dokploy/server/constants";
-import type { Domain } from "@dokploy/server/services/domain";
+import { paths } from "@undevops/server/constants";
+import type { Domain } from "@undevops/server/services/domain";
 import { parse, stringify } from "yaml";
 import { encodeBase64 } from "../docker/utils";
 import { execAsync, execAsyncRemote } from "../process/execAsync";

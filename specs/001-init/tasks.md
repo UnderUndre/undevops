@@ -42,20 +42,20 @@
 
 **Purpose**: Rebrand from Dokploy, restructure monorepo, scaffold new packages
 
-- [ ] T001 [SETUP] Rename all `package.json` `name` fields from `@dokploy/*` to `@undevops/*` across monorepo
-- [ ] T002 [SETUP] Update all `workspace:*` references and internal imports (`from "@dokploy/..."` → `from "@undevops/..."`) across all files
-- [ ] T003 [SETUP] Rename `apps/dokploy/` → `apps/web/` and `apps/schedules/` → `apps/scheduler/`; update `pnpm-workspace.yaml`
-- [ ] T004 [OPS] Update `docker-compose.yml` and `docker-compose.prod.yml` to reference new app names and image prefixes
-- [ ] T005 [OPS] Update `.github/workflows/` CI/CD pipelines for new paths, app names, and `@undevops/*` package names
-- [ ] T006 [SETUP] Update root `README.md`, `LICENSE`, and in-product attribution — preserve Dokploy Apache 2.0 notices per FR-031, SC-007
-- [ ] T007 [SETUP] Verify full build succeeds after rename: `pnpm install && pnpm build` (gate: blocks all downstream work)
-- [ ] T008 [SETUP] Verify all existing tests pass after rename: `pnpm test` (gate: confirms no regressions)
-- [ ] T008a [SETUP] Verify build and tests pass on Windows developer host: `pnpm install && pnpm build && pnpm test` on Windows (FR-032 baseline, SC-009)
-- [ ] T009 [SETUP] Create `packages/core` skeleton: `package.json` (`@undevops/core`), `tsconfig.json`, `src/index.ts`
-- [ ] T010 [SETUP] Create `packages/plugin-sdk` skeleton: `package.json` (`@undevops/plugin-sdk`), `tsconfig.json`, `src/index.ts`
-- [ ] T011 [SETUP] Create `packages/ai-pack` skeleton: `package.json` (`@undevops/ai-pack`), `tsconfig.json`, `src/index.ts`
-- [ ] T012 [SETUP] Create `apps/mcp-server` skeleton: `package.json` (`@undevops/mcp-server`), `tsconfig.json`, `Dockerfile`, `src/index.ts`
-- [ ] T013 [SETUP] Create `apps/cli` skeleton: `package.json` (`@undevops/cli`), `tsconfig.json`, commander setup in `src/index.ts`
+- [X] T001 [SETUP] Rename all `package.json` `name` fields from `@dokploy/*` to `@undevops/*` across monorepo
+- [X] T002 [SETUP] Update all `workspace:*` references and internal imports (`from "@dokploy/..."` → `from "@undevops/..."`) across all files
+- [X] T003 [SETUP] Rename `apps/dokploy/` → `apps/web/` and `apps/schedules/` → `apps/scheduler/`; update `pnpm-workspace.yaml`
+- [X] T004 [OPS] Update `docker-compose.yml` and `docker-compose.prod.yml` to reference new app names and image prefixes
+- [X] T005 [OPS] Update `.github/workflows/` CI/CD pipelines for new paths, app names, and `@undevops/*` package names
+- [X] T006 [SETUP] Update root `README.md`, `LICENSE`, and in-product attribution — preserve Dokploy Apache 2.0 notices per FR-031, SC-007
+- [X] T007 [SETUP] Verify full build succeeds after rename: `pnpm install && pnpm build` (gate: blocks all downstream work)
+- [X] T008 [SETUP] Verify all existing tests pass after rename: `pnpm test` (gate: confirms no regressions)
+- [X] T008a [SETUP] Verify build and tests pass on Windows developer host: `pnpm install && pnpm build && pnpm test` on Windows (FR-032 baseline, SC-009)
+- [X] T009 [SETUP] Create `packages/core` skeleton: `package.json` (`@undevops/core`), `tsconfig.json`, `src/index.ts`
+- [X] T010 [SETUP] Create `packages/plugin-sdk` skeleton: `package.json` (`@undevops/plugin-sdk`), `tsconfig.json`, `src/index.ts`
+- [X] T011 [SETUP] Create `packages/ai-pack` skeleton: `package.json` (`@undevops/ai-pack`), `tsconfig.json`, `src/index.ts`
+- [X] T012 [SETUP] Create `apps/mcp-server` skeleton: `package.json` (`@undevops/mcp-server`), `tsconfig.json`, `Dockerfile`, `src/index.ts`
+- [X] T013 [SETUP] Create `apps/cli` skeleton: `package.json` (`@undevops/cli`), `tsconfig.json`, commander setup in `src/index.ts`
 
 ---
 
@@ -67,38 +67,38 @@
 
 ### Database Schema & Migrations
 
-- [ ] T014 [DB] Add new `pgEnum` types to Drizzle schema in `packages/server/src/db/schema.ts`: `actorType`, `gateStatusType`, `gatePolicyType`, `agentActionType`, `pendingActionStatus`, `mcpAccessLevel`, `mcpTargetType`, `aiProviderType`, `verdictType`, `secretScopeType`
-- [ ] T015 [DB] Add `mcp_clients` table to Drizzle schema with SHA-256 token hash, scope, revocation, request counter per data-model.md Migration 002
-- [ ] T016 [DB] Add `plugins` table to Drizzle schema with manifest JSON, fault tracking, hook subscriptions per data-model.md Migration 003
-- [ ] T017 [DB] Add `ai_reviewers` table to Drizzle schema with provider, credential ref, timeout per data-model.md Migration 004
-- [ ] T018 [DB] Add `deployment_review_verdicts` table to Drizzle schema per data-model.md Migration 004
-- [ ] T019 [DB] Add `secrets` table to Drizzle schema with AES-256-GCM encrypted value, scope, versioning per data-model.md Migration 005
-- [ ] T020 [DB] Add `pending_agent_actions` table to Drizzle schema per data-model.md Migration 006
-- [ ] T021 [DB] Enhance `deployment` table: add `initiatingActorType`, `initiatingActorId`, `gateStatus` columns per data-model.md Migration 006
-- [ ] T022 [DB] Enhance `environment` table: add `gatePolicy`, `reviewerIds`, `autoApproveAgents` columns per data-model.md Migration 006
-- [ ] T023 [DB] Enhance `audit_log` table: add `actor_type`, `actor_id`, `payload` columns + new indexes per data-model.md Migration 006
-- [ ] T024 [DB] Create all performance indexes per data-model.md §Indexes for Performance: `mcpClient_tokenHash_idx`, `mcpClient_revokedAt_idx`, `auditLog_actorType_idx`, `auditLog_actorId_idx`, `verdict_deployment_reviewer_unique`, `secret_scope_idx`, `secret_key_unique`, `plugin_enabled_idx`, `pendingAction_status_idx`, `pendingAction_expiresAt_idx`
-- [ ] T025 [DB] Generate Drizzle migration files for all schema changes; verify `drizzle-kit generate` produces clean SQL
-- [ ] T026 [DB] Write seed data script in `packages/server/src/db/seed.ts` for development: test org, admin user, sample server, project, environment
+- [X] T014 [DB] Add new `pgEnum` types to Drizzle schema in `packages/server/src/db/schema.ts`: `actorType`, `gateStatusType`, `gatePolicyType`, `agentActionType`, `pendingActionStatus`, `mcpAccessLevel`, `mcpTargetType`, `aiProviderType`, `verdictType`, `secretScopeType`
+- [X] T015 [DB] Add `mcp_clients` table to Drizzle schema with SHA-256 token hash, scope, revocation, request counter per data-model.md Migration 002
+- [X] T016 [DB] Add `plugins` table to Drizzle schema with manifest JSON, fault tracking, hook subscriptions per data-model.md Migration 003
+- [X] T017 [DB] Add `ai_reviewers` table to Drizzle schema with provider, credential ref, timeout per data-model.md Migration 004
+- [X] T018 [DB] Add `deployment_review_verdicts` table to Drizzle schema per data-model.md Migration 004
+- [X] T019 [DB] Add `secrets` table to Drizzle schema with AES-256-GCM encrypted value, scope, versioning per data-model.md Migration 005
+- [X] T020 [DB] Add `pending_agent_actions` table to Drizzle schema per data-model.md Migration 006
+- [X] T021 [DB] Enhance `deployment` table: add `initiatingActorType`, `initiatingActorId`, `gateStatus` columns per data-model.md Migration 006
+- [X] T022 [DB] Enhance `environment` table: add `gatePolicy`, `reviewerIds`, `autoApproveAgents` columns per data-model.md Migration 006
+- [X] T023 [DB] Enhance `audit_log` table: add `actor_type`, `actor_id`, `payload` columns + new indexes per data-model.md Migration 006
+- [X] T024 [DB] Create all performance indexes per data-model.md §Indexes for Performance: `mcpClient_tokenHash_idx`, `mcpClient_revokedAt_idx`, `auditLog_actorType_idx`, `auditLog_actorId_idx`, `verdict_deployment_reviewer_unique`, `secret_scope_idx`, `secret_key_unique`, `plugin_enabled_idx`, `pendingAction_status_idx`, `pendingAction_expiresAt_idx`
+- [X] T025 [DB] Generate Drizzle migration files for all schema changes; verify `drizzle-kit generate` produces clean SQL
+- [X] T026 [DB] Write seed data script in `packages/server/src/db/seed.ts` for development: test org, admin user, sample server, project, environment
 
 ### Core Extraction
 
-- [ ] T027 [BE] Extract deployment orchestration from `packages/server` → `packages/core/src/deploy/` (build pipeline, Docker integration, health checks)
-- [ ] T028 [BE] Extract server management from `packages/server` → `packages/core/src/server-mgmt/` (SSH connectivity, health monitoring, registration)
-- [ ] T029 [BE] Extract Traefik/proxy integration from `packages/server` → `packages/core/src/proxy/` (reverse proxy config, TLS, routing)
-- [ ] T030 [BE] Extract secret encryption (AES-256-GCM) from `packages/server` → `packages/core/src/secrets/` (encrypt/decrypt/rotate, `UNDEVOPS_ENCRYPTION_KEY` env)
-- [ ] T031 [BE] Extract audit event recording from `packages/server` → `packages/core/src/audit/` (structured events, actor attribution, extended action types)
-- [ ] T032 [BE] Extract auth core (better-auth) from `packages/server` → `packages/core/src/auth/` (session management). Define pluggable auth interface: `IAuthProvider` with `authenticate(credentials): Promise<Session>`, `authorize(session, resource, action): Promise<boolean>`, `invalidate(sessionId): Promise<void>`. Document extension points for future SSO/RBAC adapters (FR-007)
-- [ ] T033 [BE] Update `packages/server` to re-export from `@undevops/core` for backward compatibility during transition
-- [ ] T034 [BE] Update all apps (`web`, `api`, `scheduler`) to import from `@undevops/core` directly where appropriate
-- [ ] T034a [SETUP] Configure connection pool sizing per app: web(10), api(10), mcp-server(15), scheduler(5), cli(on-demand). Set Postgres max_connections=120. Document connection budget in architecture.md
-- [ ] T035 [OPS] Add CI gate: `packages/core` builds without `packages/ai-pack` present (FR-030, SC-005 open-core readiness) in `.github/workflows/ci.yml`
+- [X] T027 [BE] Extract deployment orchestration from `packages/server` → `packages/core/src/deploy/` (build pipeline, Docker integration, health checks)
+- [X] T028 [BE] Extract server management from `packages/server` → `packages/core/src/server-mgmt/` (SSH connectivity, health monitoring, registration)
+- [X] T029 [BE] Extract Traefik/proxy integration from `packages/server` → `packages/core/src/proxy/` (reverse proxy config, TLS, routing)
+- [X] T030 [BE] Extract secret encryption (AES-256-GCM) from `packages/server` → `packages/core/src/secrets/` (encrypt/decrypt/rotate, `UNDEVOPS_ENCRYPTION_KEY` env)
+- [X] T031 [BE] Extract audit event recording from `packages/server` → `packages/core/src/audit/` (structured events, actor attribution, extended action types)
+- [X] T032 [BE] Extract auth core (better-auth) from `packages/server` → `packages/core/src/auth/` (session management). Define pluggable auth interface: `IAuthProvider` with `authenticate(credentials): Promise<Session>`, `authorize(session, resource, action): Promise<boolean>`, `invalidate(sessionId): Promise<void>`. Document extension points for future SSO/RBAC adapters (FR-007)
+- [X] T033 [BE] Update `packages/server` to re-export from `@undevops/core` for backward compatibility during transition
+- [X] T034 [BE] Update all apps (`web`, `api`, `scheduler`) to import from `@undevops/core` directly where appropriate
+- [X] T034a [SETUP] Configure connection pool sizing per app: web(10), api(10), mcp-server(15), scheduler(5), cli(on-demand). Set Postgres max_connections=120. Document connection budget in architecture.md
+- [X] T035 [OPS] Add CI gate: `packages/core` builds without `packages/ai-pack` present (FR-030, SC-005 open-core readiness) in `.github/workflows/ci.yml`
 
 ### Auth & Middleware Framework
 
-- [ ] T036 [BE] Implement actor-attributed audit middleware in `packages/core/src/audit/` — records `actor_type` (human/agent/plugin/system) and `actor_id` on every state-changing operation (FR-034 partial, SC-006)
-- [ ] T037 [BE] Implement MCP bearer token auth middleware in `apps/mcp-server/src/auth/` — SHA-256 hash lookup against `mcp_clients`, `revoked_at` check, scope extraction (FR-013). On token revocation, middleware MUST signal the SSE transport layer to close all active connections associated with revoked token hash. Implement token-revocation event bus: revocation endpoint publishes event → SSE transport subscribes → closes matching streams. Track requestCount + lastUsedAt in Redis (INCR + timestamp), flush to Postgres every 60s via scheduled job — avoids hot-row lock on auth path under burst traffic.
-- [ ] T038 [BE] Implement secret redaction middleware in `apps/mcp-server/src/` — maintain a Set of known secret values in memory; before any MCP/API response serialization, do global `replaceAll(knownSecretValue, '***REDACTED***')` on the serialized JSON string. This value-based global replace catches secrets in any field position, not just known patterns (FR-012, SC-008)
+- [X] T036 [BE] Implement actor-attributed audit middleware in `packages/core/src/audit/` — records `actor_type` (human/agent/plugin/system) and `actor_id` on every state-changing operation (FR-034 partial, SC-006)
+- [X] T037 [BE] Implement MCP bearer token auth middleware in `apps/mcp-server/src/auth/` — SHA-256 hash lookup against `mcp_clients`, `revoked_at` check, scope extraction (FR-013). On token revocation, middleware MUST signal the SSE transport layer to close all active connections associated with revoked token hash. Implement token-revocation event bus: revocation endpoint publishes event → SSE transport subscribes → closes matching streams. Track requestCount + lastUsedAt in Redis (INCR + timestamp), flush to Postgres every 60s via scheduled job — avoids hot-row lock on auth path under burst traffic.
+- [X] T038 [BE] Implement secret redaction middleware in `apps/mcp-server/src/` — maintain a Set of known secret values in memory; before any MCP/API response serialization, do global `replaceAll(knownSecretValue, '***REDACTED***')` on the serialized JSON string. This value-based global replace catches secrets in any field position, not just known patterns (FR-012, SC-008)
 
 **Checkpoint**: Foundation ready — user story implementation can now begin
 
@@ -112,26 +112,31 @@
 
 ### Implementation for US1
 
-- [ ] T039 [BE] [US1] Verify and stabilize Docker orchestration (dockerode + compose) works with `@undevops/core` package names in `packages/core/src/deploy/`
-- [ ] T040 [BE] [US1] Verify and stabilize Traefik integration (reverse proxy + TLS via Let's Encrypt) end-to-end in `packages/core/src/proxy/`
-- [ ] T041 [BE] [US1] Verify build system (Dockerfile, nixpacks, railpack) works with renamed packages in `packages/core/src/deploy/`
-- [ ] T041a [BE] [US1] Implement webhook signature verification (HMAC-SHA256) for GitHub/GitLab/Bitbucket in `apps/api/src/routes/webhooks/` — reject unsigned or invalid-signature webhooks with 401
-- [ ] T042 [BE] [US1] Verify server SSH connectivity (SSH2) in `packages/core/src/server-mgmt/`
-- [ ] T043 [BE] [US1] Implement zero-downtime deploy: keep previous version healthy until new passes health check in `packages/core/src/deploy/` (FR-006). Hard timeout: if new container doesn't pass health check within 10 minutes, fail deployment, mark it as failed, and unblock deployment queue. Never let queue hang indefinitely.
-- [ ] T044 [BE] [US1] Implement real-time log streaming to web UI via SSE in `packages/core/src/deploy/` (FR-004)
-- [ ] T045 [BE] [US1] Implement concurrent deployment queue: only one per project, queue collapses to latest commit in `packages/core/src/deploy/`
-- [ ] T046 [BE] [US1] Integrate secret encryption at rest (AES-256-GCM) into deployment flow — inject decrypted secrets at runtime, never log values in `packages/core/src/secrets/` (FR-008)
-- [ ] T046a [BE] [US1] Implement startup reconciliation: on controller start, compare DB state vs running containers and certificate state, surface discrepancies (crash recovery edge case per spec)
-- [ ] T047 [FE] [US1] Rebrand web UI: update logo, name, colors, all Dokploy references → undevops in `apps/web/src/app/` and `apps/web/src/components/`
-- [ ] T048 [FE] [US1] Add environment management UI within projects: create, configure (gate policy, reviewers), view deployments in `apps/web/src/components/`
-- [ ] T049 [FE] [US1] Add secrets management UI: create, rotate, delete — values never shown after creation in `apps/web/src/components/`
-- [ ] T050 [FE] [US1] Update deployment flow UI: select environment, view health check progress, rollback button in `apps/web/src/components/`
-- [ ] T051 [FE] [US1] Add server health dashboard: status, resource usage, connected since in `apps/web/src/components/`
-- [ ] T052 [FE] [US1] Add version display in UI footer/settings (undevops version, upstream Dokploy version, loaded plugins) in `apps/web/src/components/`
-- [ ] T053 [BE] [US1] Implement CLI commands: `server list/add/remove`, `project list/create/deploy`, `deployment list/logs`, `secret set/list`, `env set/list/unset` in `apps/cli/src/commands/` (FR-010)
-- [ ] T054 [BE] [US1] Add JSON output format (`--format json`) for all CLI commands in `apps/cli/src/output/`
-- [ ] T055 [BE] [US1] Implement audit logging for all US1 state-changing operations (deploy, server add/remove, project create/delete, secret set) in `packages/core/src/audit/` (SC-006)
-- [ ] T056 [E2E] [US1] Integration test: fresh server → connect → deploy project → verify HTTPS (acceptance scenario 1–4, SC-001)
+- [X] T039 [BE] [US1] Verify and stabilize Docker orchestration (dockerode + compose) works with `@undevops/core` package names in `packages/core/src/deploy/`
+- [X] T040 [BE] [US1] Verify and stabilize Traefik integration (reverse proxy + TLS via Let's Encrypt) end-to-end in `packages/core/src/proxy/`
+- [X] T041 [BE] [US1] Verify build system (Dockerfile, nixpacks, railpack) works with renamed packages in `packages/core/src/deploy/`
+- [X] T041a [BE] [US1] Implement webhook signature verification (HMAC-SHA256) for GitHub/GitLab/Bitbucket in `apps/api/src/routes/webhooks/` — reject unsigned or invalid-signature webhooks with 401
+- [X] T042 [BE] [US1] Verify server SSH connectivity (SSH2) in `packages/core/src/server-mgmt/`
+- [X] T043 [BE] [US1] Implement zero-downtime deploy: keep previous version healthy until new passes health check in `packages/core/src/deploy/` (FR-006). Hard timeout: if new container doesn't pass health check within 10 minutes, fail deployment, mark it as failed, and unblock deployment queue. Never let queue hang indefinitely.
+- [X] T044 [BE] [US1] Implement real-time log streaming to web UI via SSE in `packages/core/src/deploy/` (FR-004)
+- [X] T045 [BE] [US1] Implement concurrent deployment queue: only one per project, queue collapses to latest commit in `packages/core/src/deploy/`
+- [X] T046 [BE] [US1] Integrate secret encryption at rest (AES-256-GCM) into deployment flow — inject decrypted secrets at runtime, never log values in `packages/core/src/secrets/` (FR-008)
+- [X] T046a [BE] [US1] Implement startup reconciliation: on controller start, compare DB state vs running containers and certificate state, surface discrepancies (crash recovery edge case per spec)
+- [X] T047 [FE] [US1] Rebrand web UI: update logo, name, colors, all Dokploy references → undevops in `apps/web/components/` and `apps/web/pages/`
+
+- [X] T048 [FE] [US1] Add environment management UI within projects: create, configure (gate policy, reviewers), view deployments in `apps/web/components/dashboard/environments/`
+
+- [X] T049 [FE] [US1] Add secrets management UI: create, rotate, delete — values never shown after creation in `apps/web/components/dashboard/secrets/`
+
+- [X] T050 [FE] [US1] Update deployment flow UI: select environment, view health check progress, rollback button in `apps/web/components/dashboard/deploy-flow/`
+
+- [X] T051 [FE] [US1] Add server health dashboard: status, resource usage, connected since in `apps/web/components/dashboard/server-health/`
+
+- [X] T052 [FE] [US1] Add version display in UI footer/settings (undevops version, upstream Dokploy version, loaded plugins) in `apps/web/components/dashboard/version-display/`
+- [X] T053 [BE] [US1] Implement CLI commands: `server list/add/remove`, `project list/create/deploy`, `deployment list/logs`, `secret set/list`, `env set/list/unset` in `apps/cli/src/commands/` (FR-010)
+- [X] T054 [BE] [US1] Add JSON output format (`--format json`) for all CLI commands in `apps/cli/src/output/`
+- [X] T055 [BE] [US1] Implement audit logging for all US1 state-changing operations (deploy, server add/remove, project create/delete, secret set) in `packages/core/src/audit/` (SC-006)
+- [X] T056 [E2E] [US1] Integration test: fresh server → connect → deploy project → verify HTTPS (acceptance scenario 1–4, SC-001)
 
 **Checkpoint**: User Story 1 should be fully functional and testable independently
 
@@ -145,20 +150,20 @@
 
 ### Implementation for US2
 
-- [ ] T057 [BE] [US2] Implement stdio transport adapter in `apps/mcp-server/src/transport/` — stdin/stdout JSON-RPC
-- [ ] T058 [BE] [US2] Implement SSE transport adapter in `apps/mcp-server/src/transport/` — HTTP `GET /sse` + `POST /messages`, heartbeat every 30s
-- [ ] T059 [BE] [US2] Implement `undevops://servers` resource handler (list + detail) in `apps/mcp-server/src/resources/` per contracts/mcp-api.md
-- [ ] T060 [BE] [US2] Implement `undevops://projects` resource handler (list + detail with environments) in `apps/mcp-server/src/resources/` per contracts/mcp-api.md
-- [ ] T061 [BE] [US2] Implement `undevops://deployments` resource handler (list + detail, paginated) in `apps/mcp-server/src/resources/` per contracts/mcp-api.md
-- [ ] T062 [BE] [US2] Implement `undevops://deployments/{id}/logs` resource handler (last N lines, p95 < 500ms) in `apps/mcp-server/src/resources/` per contracts/mcp-api.md (SC-002)
-- [ ] T063 [BE] [US2] Implement `undevops://audit` resource handler (paginated, filterable by actor/action/target/time) in `apps/mcp-server/src/resources/` per contracts/mcp-api.md
-- [ ] T064 [BE] [US2] Add `undevops://version` resource: undevops version, upstream Dokploy version, loaded plugins per FR-033
-- [ ] T065 [BE] [US2] Implement MCP request audit logging: record client ID, resource accessed, timestamp to `audit_log` with `actor_type: "agent"` (FR-014)
-- [ ] T066 [BE] [US2] Implement rate limiting per MCP token via Redis sliding window per contracts/mcp-api.md §Rate Limiting
-- [ ] T067 [FE] [US2] Add MCP token management page in web UI: create, list (name, scope, prefix, last-used, request count), revoke per FR-013a, FR-013b
-- [ ] T068 [FE] [US2] Add audit log viewer page: filterable by actor_type, action, target_resource, time range in `apps/web/src/components/`
-- [ ] T069 [BE] [US2] Implement CLI commands: `mcp-tokens create/list/revoke` in `apps/cli/src/commands/`
-- [ ] T070 [E2E] [US2] Integration test: MCP client → list servers → read deployment logs → verify value-based secret redaction (known secret values replaced with ``***REDACTED***`` in any field position) → verify < 500ms p95 (acceptance scenarios 1–4, SC-002, SC-008)
+- [X] T057 [BE] [US2] Implement stdio transport adapter in `apps/mcp-server/src/transport/` — stdin/stdout JSON-RPC
+- [X] T058 [BE] [US2] Implement SSE transport adapter in `apps/mcp-server/src/transport/` — HTTP `GET /sse` + `POST /messages`, heartbeat every 30s
+- [X] T059 [BE] [US2] Implement `undevops://servers` resource handler (list + detail) in `apps/mcp-server/src/resources/` per contracts/mcp-api.md
+- [X] T060 [BE] [US2] Implement `undevops://projects` resource handler (list + detail with environments) in `apps/mcp-server/src/resources/` per contracts/mcp-api.md
+- [X] T061 [BE] [US2] Implement `undevops://deployments` resource handler (list + detail, paginated) in `apps/mcp-server/src/resources/` per contracts/mcp-api.md
+- [X] T062 [BE] [US2] Implement `undevops://deployments/{id}/logs` resource handler (last N lines, p95 < 500ms) in `apps/mcp-server/src/resources/` per contracts/mcp-api.md (SC-002)
+- [X] T063 [BE] [US2] Implement `undevops://audit` resource handler (paginated, filterable by actor/action/target/time) in `apps/mcp-server/src/resources/` per contracts/mcp-api.md
+- [X] T064 [BE] [US2] Add `undevops://version` resource: undevops version, upstream Dokploy version, loaded plugins per FR-033
+- [X] T065 [BE] [US2] Implement MCP request audit logging: record client ID, resource accessed, timestamp to `audit_log` with `actor_type: "agent"` (FR-014)
+- [X] T066 [BE] [US2] Implement rate limiting per MCP token via Redis sliding window per contracts/mcp-api.md §Rate Limiting
+- [X] T067 [FE] [US2] Add MCP token management page in web UI: create, list (name, scope, prefix, last-used, request count), revoke per FR-013a, FR-013b
+- [X] T068 [FE] [US2] Add audit log viewer page: filterable by actor_type, action, target_resource, time range in `apps/web/src/components/`
+- [X] T069 [BE] [US2] Implement CLI commands: `mcp-tokens create/list/revoke` in `apps/cli/src/commands/`
+- [X] T070 [E2E] [US2] Integration test: MCP client → list servers → read deployment logs → verify value-based secret redaction (known secret values replaced with ``***REDACTED***`` in any field position) → verify < 500ms p95 (acceptance scenarios 1–4, SC-002, SC-008)
 
 **Checkpoint**: User Stories 1 AND 2 should both work independently
 
@@ -172,21 +177,21 @@
 
 ### Implementation for US3
 
-- [ ] T071 [BE] [US3] Define `undevops-plugin.json` manifest schema (Zod validation) in `packages/plugin-sdk/src/types/` per contracts/plugin-sdk.md §Plugin Manifest
-- [ ] T072 [BE] [US3] Define typed hook payloads: `PreDeployPayload`, `PostDeployPayload`, `DeployFailedPayload`, `ServerAddedPayload`, `ServerRemovedPayload`, `ProjectCreatedPayload`, `ProjectDeletedPayload` in `packages/plugin-sdk/src/types/` per contracts/plugin-sdk.md
-- [ ] T073 [BE] [US3] Implement plugin loader in `packages/plugin-sdk/src/host/`: scan directory, validate manifests (Zod), load modules (dynamic import), check SDK version compatibility. Plugins run in-process via dynamic import() — this gives them full Node.js runtime access. Permission system is a UX/administrative boundary, not security sandbox. Document this honestly in plugin-sdk README. Future: investigate Worker threads or subprocess isolation for untrusted plugins.
-- [ ] T074 [BE] [US3] Implement hook dispatcher in `packages/plugin-sdk/src/host/`: ordered invocation by priority, error isolation per hook, timeout enforcement, faulted-state tracking (FR-018). Implement crash-loop prevention: track fault count + timestamps per plugin. When plugin faults ≥3 times within rolling 10-minute window, auto-set status='disabled', audit-log auto-disable, and skip subsequent invocations until admin re-enables. Fault counter resets only on explicit re-enable.
-- [ ] T075 [BE] [US3] Implement permission system in `packages/plugin-sdk/src/permissions/`: declare in manifest, prompt on install, grant/deny persist to `plugins.grantedPermissions`, runtime enforcement on `PluginApiClient`
-- [ ] T076 [BE] [US3] Implement `PluginApiClient` in `packages/plugin-sdk/src/`: scoped, permission-checked API with rate limiting (30 req/min) and timeout (5s)
-- [ ] T077 [BE] [US3] Implement plugin test utilities: `createTestContext`, `mockPayload` builders in `packages/plugin-sdk/src/testing.ts` per contracts/plugin-sdk.md §Testing Support
-- [ ] T078 [BE] [US3] Write reference plugin: "log every deployment event to stdout" in `plugins/deploy-logger/` with manifest, hook implementation, and package.json
-- [ ] T079 [BE] [US3] Integrate plugin host into deployment pipeline: fire `pre-deploy`, `post-deploy`, `deploy-failed` hooks in `packages/core/src/deploy/`
-- [ ] T080 [BE] [US3] Integrate plugin host into server/project lifecycle: fire `server-added`, `server-removed`, `project-created`, `project-deleted` hooks in `packages/core/src/server-mgmt/` and project services
-- [ ] T081 [BE] [US3] Implement plugin install/list/enable/disable/remove CLI commands in `apps/cli/src/commands/plugins.ts`
-- [ ] T082 [FE] [US3] Add plugin management page to web UI: list plugins, status (active/faulted/disabled/failed), permissions, last invoked, enable/disable in `apps/web/src/components/`
-- [ ] T083 [E2E] [US3] Integration test: install reference plugin → trigger deploy → verify hook fires (acceptance scenarios 1–2, SC-003)
-- [ ] T084 [E2E] [US3] Integration test: plugin throws in hook → verify deployment continues, plugin marked faulted (FR-018, acceptance scenario 3)
-- [ ] T085 [E2E] [US3] Integration test: plugin declares permission → user prompted to grant/deny → recorded (FR-019, acceptance scenario 4)
+- [X] T071 [BE] [US3] Define `undevops-plugin.json` manifest schema (Zod validation) in `packages/plugin-sdk/src/types/` per contracts/plugin-sdk.md §Plugin Manifest
+- [X] T072 [BE] [US3] Define typed hook payloads: `PreDeployPayload`, `PostDeployPayload`, `DeployFailedPayload`, `ServerAddedPayload`, `ServerRemovedPayload`, `ProjectCreatedPayload`, `ProjectDeletedPayload` in `packages/plugin-sdk/src/types/` per contracts/plugin-sdk.md
+- [X] T073 [BE] [US3] Implement plugin loader in `packages/plugin-sdk/src/host/`: scan directory, validate manifests (Zod), load modules (dynamic import), check SDK version compatibility. Plugins run in-process via dynamic import() — this gives them full Node.js runtime access. Permission system is a UX/administrative boundary, not security sandbox. Document this honestly in plugin-sdk README. Future: investigate Worker threads or subprocess isolation for untrusted plugins.
+- [X] T074 [BE] [US3] Implement hook dispatcher in `packages/plugin-sdk/src/host/`: ordered invocation by priority, error isolation per hook, timeout enforcement, faulted-state tracking (FR-018). Implement crash-loop prevention: track fault count + timestamps per plugin. When plugin faults ≥3 times within rolling 10-minute window, auto-set status='disabled', audit-log auto-disable, and skip subsequent invocations until admin re-enables. Fault counter resets only on explicit re-enable.
+- [X] T075 [BE] [US3] Implement permission system in `packages/plugin-sdk/src/permissions/`: declare in manifest, prompt on install, grant/deny persist to `plugins.grantedPermissions`, runtime enforcement on `PluginApiClient`
+- [X] T076 [BE] [US3] Implement `PluginApiClient` in `packages/plugin-sdk/src/`: scoped, permission-checked API with rate limiting (30 req/min) and timeout (5s)
+- [X] T077 [BE] [US3] Implement plugin test utilities: `createTestContext`, `mockPayload` builders in `packages/plugin-sdk/src/testing.ts` per contracts/plugin-sdk.md §Testing Support
+- [X] T078 [BE] [US3] Write reference plugin: "log every deployment event to stdout" in `plugins/deploy-logger/` with manifest, hook implementation, and package.json
+- [X] T079 [BE] [US3] Integrate plugin host into deployment pipeline: fire `pre-deploy`, `post-deploy`, `deploy-failed` hooks in `packages/core/src/deploy/`
+- [X] T080 [BE] [US3] Integrate plugin host into server/project lifecycle: fire `server-added`, `server-removed`, `project-created`, `project-deleted` hooks in `packages/core/src/server-mgmt/` and project services
+- [X] T081 [BE] [US3] Implement plugin install/list/enable/disable/remove CLI commands in `apps/cli/src/commands/plugins.ts`
+- [X] T082 [FE] [US3] Add plugin management page to web UI: list plugins, status (active/faulted/disabled/failed), permissions, last invoked, enable/disable in `apps/web/src/components/`
+- [X] T083 [E2E] [US3] Integration test: install reference plugin → trigger deploy → verify hook fires (acceptance scenarios 1–2, SC-003)
+- [X] T084 [E2E] [US3] Integration test: plugin throws in hook → verify deployment continues, plugin marked faulted (FR-018, acceptance scenario 3)
+- [X] T085 [E2E] [US3] Integration test: plugin declares permission → user prompted to grant/deny → recorded (FR-019, acceptance scenario 4)
 
 **Checkpoint**: User Stories 1, 2, AND 3 should all work independently
 
@@ -200,18 +205,18 @@
 
 ### Implementation for US4
 
-- [ ] T086 [BE] [US4] Implement `undevops_deploy` MCP tool: validate write scope, create deployment + pending agent action in `apps/mcp-server/src/tools/` per contracts/mcp-api.md
-- [ ] T087 [BE] [US4] Implement `undevops_rollback` MCP tool: validate write scope, create rollback + pending action in `apps/mcp-server/src/tools/`
-- [ ] T088 [BE] [US4] Implement `undevops_scale` MCP tool: validate exec scope, create scale action in `apps/mcp-server/src/tools/`
-- [ ] T089 [BE] [US4] Implement `undevops_inspect_deployment` and `undevops_get_logs` MCP tools for read-scope tool-oriented workflows in `apps/mcp-server/src/tools/`
-- [ ] T090 [BE] [US4] Implement pending action queue: store in `pending_agent_actions` table, surface in web UI via tRPC endpoint, auto-expire via `expires_at`
-- [ ] T091 [BE] [US4] Implement approval flow: human approves/rejects in UI → action executes → result recorded in audit log with `actor_type: "agent"` (FR-021, FR-022)
-- [ ] T092 [BE] [US4] Implement auto-approval policy: configurable per environment (`autoApproveAgents` flag), off by default
-- [ ] T093 [BE] [US4] Implement action progress subscription: agent polls or receives SSE events for deployment status (queued → building → deploying → healthy/failed)
-- [ ] T094 [BE] [US4] Implement optimistic concurrency: second action on same resource queues; if race detected, return conflict error `-32004`
-- [ ] T095 [FE] [US4] Add pending agent actions page in web UI: list pending, approve/reject with optional note, view linked deployment in `apps/web/src/components/`
-- [ ] T096 [E2E] [US4] Integration test: MCP write client → deploy → approve → verify completion + audit log (acceptance scenarios 1–4, SC-010)
-- [ ] T097 [E2E] [US4] Integration test: write client out of scope → immediate rejection, no pending state, rejection logged (FR-020)
+- [X] T086 [BE] [US4] Implement `undevops_deploy` MCP tool: validate write scope, create deployment + pending agent action in `apps/mcp-server/src/tools/` per contracts/mcp-api.md
+- [X] T087 [BE] [US4] Implement `undevops_rollback` MCP tool: validate write scope, create rollback + pending action in `apps/mcp-server/src/tools/`
+- [X] T088 [BE] [US4] Implement `undevops_scale` MCP tool: validate exec scope, create scale action in `apps/mcp-server/src/tools/`
+- [X] T089 [BE] [US4] Implement `undevops_inspect_deployment` and `undevops_get_logs` MCP tools for read-scope tool-oriented workflows in `apps/mcp-server/src/tools/`
+- [X] T090 [BE] [US4] Implement pending action queue: store in `pending_agent_actions` table, surface in web UI via tRPC endpoint, auto-expire via `expires_at`
+- [X] T091 [BE] [US4] Implement approval flow: human approves/rejects in UI → action executes → result recorded in audit log with `actor_type: "agent"` (FR-021, FR-022)
+- [X] T092 [BE] [US4] Implement auto-approval policy: configurable per environment (`autoApproveAgents` flag), off by default
+- [X] T093 [BE] [US4] Implement action progress subscription: agent polls or receives SSE events for deployment status (queued → building → deploying → healthy/failed)
+- [X] T094 [BE] [US4] Implement optimistic concurrency: second action on same resource queues; if race detected, return conflict error `-32004`
+- [X] T095 [FE] [US4] Add pending agent actions page in web UI: list pending, approve/reject with optional note, view linked deployment in `apps/web/src/components/`
+- [X] T096 [E2E] [US4] Integration test: MCP write client → deploy → approve → verify completion + audit log (acceptance scenarios 1–4, SC-010)
+- [X] T097 [E2E] [US4] Integration test: write client out of scope → immediate rejection, no pending state, rejection logged (FR-020)
 
 **Checkpoint**: User Stories 1–4 should all work independently
 
@@ -225,23 +230,22 @@
 
 ### Implementation for US5
 
-- [ ] T098 [BE] [US5] Implement `AIReviewerProvider` interface in `packages/ai-pack/src/providers/`: `review(payload): Promise<Verdict>` with timeout support
-- [ ] T099 [BE] [US5] Implement `ClaudeReviewer` provider in `packages/ai-pack/src/providers/` using Vercel AI SDK → Claude API
-- [ ] T100 [BE] [US5] Implement `GeminiReviewer` provider in `packages/ai-pack/src/providers/` using Vercel AI SDK → Gemini API
-- [ ] T101 [BE] [US5] Implement `OpenAIReviewer` provider in `packages/ai-pack/src/providers/` using Vercel AI SDK → OpenAI API
-- [ ] T102 [BE] [US5] Implement `CodexReviewer` provider in `packages/ai-pack/src/providers/` using Vercel AI SDK → Codex API
-- [ ] T103 [BE] [US5] Implement `CustomReviewer` provider for self-hosted/OpenAI-compatible endpoints with configurable `apiUrl` in `packages/ai-pack/src/providers/`
-- [ ] T104 [BE] [US5] Implement change payload builder in `packages/ai-pack/src/review/`: diff extraction, env var change detection, compose change detection per FR-024
-- [ ] T105 [BE] [US5] Implement gate evaluator in `packages/ai-pack/src/review/`: send to all reviewers in parallel, collect verdicts with per-reviewer `timeoutSeconds`, enforce strict-by-default policy (any FAIL/ABSENT → blocked) per FR-025, FR-025a
-- [ ] T106 [BE] [US5] Implement admin override: written reason required, logged to `audit_log` with `action: "gate_bypassed"`, recorded in `deployment_review_verdicts` per FR-025
-- [ ] T107 [BE] [US5] Integrate gate into deployment flow: gated environments enter `gateStatus: "pending"` state, evaluator runs, transitions to `approved`/`rejected`/`timed_out` in `packages/core/src/deploy/`
-- [ ] T108 [BE] [US5] Persist reviewer responses in `deployment_review_verdicts` table: verdict, reasoning, confidence, payload, duration_ms per FR-026
-- [ ] T109 [FE] [US5] Add AI reviewer configuration UI: add/remove reviewers, set timeouts, assign to environments, configure model + provider in `apps/web/src/components/`
-- [ ] T110 [FE] [US5] Add review verdict display in deployment detail: per-reviewer verdict, concerns, confidence, timestamps in `apps/web/src/components/`
-- [ ] T111 [E2E] [US5] Integration test: 2 reviewers → both PASS → deploy proceeds automatically (acceptance scenarios 1–2)
-- [ ] T112 [E2E] [US5] Integration test: 2 reviewers → 1 FAIL → deploy blocked → override with reason → proceeds (acceptance scenario 3)
-- [ ] T113 [E2E] [US5] Integration test: reviewer timeout → ABSENT → strict policy blocks deploy (acceptance scenario 4, FR-025a)
-- [ ] T114 [E2E] [US5] Performance test: 2 reviewers, ≤200 changed lines → verdicts collected < 60s (SC-004)
+- [X] T098 [BE] [US5] Implement `AIReviewerProvider` interface in `packages/ai-pack/src/providers/`: `review(payload): Promise<Verdict>` with timeout support
+- [X] T099 [BE] [US5] Implement `ClaudeReviewer` provider in `packages/ai-pack/src/providers/` using Vercel AI SDK → Claude API
+- [X] T100 [BE] [US5] Implement `GeminiReviewer` provider in `packages/ai-pack/src/providers/` using Vercel AI SDK → Gemini API
+- [X] T101 [BE] [US5] Implement `OpenAIReviewer` provider in `packages/ai-pack/src/providers/` using Vercel AI SDK → OpenAI API
+- [X] T102 [BE] [US5] Implement `CodexReviewer` provider in `packages/ai-pack/src/providers/` using Vercel AI SDK → Codex API
+- [X] T103 [BE] [US5] Implement `CustomReviewer` provider for self-hosted/OpenAI-compatible endpoints with configurable `apiUrl` in `packages/ai-pack/src/providers/`
+- [X] T104 [BE] [US5] Implement change payload builder in `packages/ai-pack/src/review/`: diff extraction, env var change detection, compose change detection per FR-024
+- [X] T105 [BE] [US5] Implement gate evaluator in `packages/ai-pack/src/review/`: send to all reviewers in parallel, collect verdicts with per-reviewer `timeoutSeconds`, enforce strict-by-default policy (any FAIL/ABSENT → blocked) per FR-025, FR-025a
+- [X] T106 [BE] [US5] Implement admin override: written reason required, logged to `audit_log` with `action: "gate_bypassed"`, recorded in `deployment_review_verdicts` per FR-025
+- [X] T107 [BE] [US5] Integrate gate into deployment flow: gated environments enter `gateStatus: "pending"` state, evaluator runs, transitions to `approved`/`rejected`/`timed_out` in `packages/core/src/deploy/`
+- [X] T109 [FE] [US5] Add AI reviewer configuration UI: add/remove reviewers, set timeouts, assign to environments, configure model + provider in `apps/web/src/components/`
+- [X] T110 [FE] [US5] Add review verdict display in deployment detail: per-reviewer verdict, concerns, confidence, timestamps in `apps/web/src/components/`
+- [X] T111 [E2E] [US5] Integration test: 2 reviewers → both PASS → deploy proceeds automatically (acceptance scenarios 1–2)
+- [X] T112 [E2E] [US5] Integration test: 2 reviewers → 1 FAIL → deploy blocked → override with reason → proceeds (acceptance scenario 3)
+- [X] T113 [E2E] [US5] Integration test: reviewer timeout → ABSENT → strict policy blocks deploy (acceptance scenario 4, FR-025a)
+- [X] T114 [E2E] [US5] Performance test: 2 reviewers, ≤200 changed lines → verdicts collected < 60s (SC-004)
 
 **Checkpoint**: User Stories 1–5 should all work independently
 
@@ -255,15 +259,15 @@
 
 ### Implementation for US6
 
-- [ ] T115 [BE] [US6] Preserve and verify Dokploy's Docker Swarm integration under `@undevops/*` package names in `packages/core/src/deploy/`
-- [ ] T116 [BE] [US6] Implement multi-node replica scheduling: distribute replicas across distinct nodes when `replicas > 1` in `packages/core/src/deploy/` per FR-028
-- [ ] T117 [BE] [US6] Implement node health monitoring: periodic check (BullMQ scheduled job), mark degraded/unreachable in `packages/core/src/server-mgmt/` per FR-029
-- [ ] T118 [BE] [US6] Implement replica rescheduling: drain from degraded nodes within configurable timeout, reschedule to healthy nodes in `packages/core/src/deploy/` per FR-029
-- [ ] T119 [BE] [US6] Update Traefik config for multi-node load balancing: distribute traffic across healthy replicas in `packages/core/src/proxy/`
-- [ ] T120 [FE] [US6] Add cluster topology view in web UI: nodes, health, replica placement, resource utilization in `apps/web/src/components/`
-- [ ] T121 [E2E] [US6] Integration test: 3 servers → deploy 3 replicas → verify distribution across distinct nodes (acceptance scenario 1, FR-028)
-- [ ] T122 [E2E] [US6] Integration test: kill 1 node → replicas reschedule → service continues via load balancer (acceptance scenario 2, FR-029)
-- [ ] T123 [E2E] [US6] Integration test: node rejoins → eligible for next deployment placement (acceptance scenario 3)
+- [X] T115 [BE] [US6] Preserve and verify Dokploy's Docker Swarm integration under `@undevops/*` package names in `packages/core/src/deploy/`
+- [X] T116 [BE] [US6] Implement multi-node replica scheduling: distribute replicas across distinct nodes when `replicas > 1` in `packages/core/src/deploy/` per FR-028
+- [X] T117 [BE] [US6] Implement node health monitoring: periodic check (BullMQ scheduled job), mark degraded/unreachable in `packages/core/src/server-mgmt/` per FR-029
+- [X] T118 [BE] [US6] Implement replica rescheduling: drain from degraded nodes within configurable timeout, reschedule to healthy nodes in `packages/core/src/deploy/` per FR-029
+- [X] T119 [BE] [US6] Update Traefik config for multi-node load balancing: distribute traffic across healthy replicas in `packages/core/src/proxy/`
+- [X] T120 [FE] [US6] Add cluster topology view in web UI: nodes, health, replica placement, resource utilization in `apps/web/src/components/`
+- [X] T121 [E2E] [US6] Integration test: 3 servers → deploy 3 replicas → verify distribution across distinct nodes (acceptance scenario 1, FR-028)
+- [X] T122 [E2E] [US6] Integration test: kill 1 node → replicas reschedule → service continues via load balancer (acceptance scenario 2, FR-029)
+- [X] T123 [E2E] [US6] Integration test: node rejoins → eligible for next deployment placement (acceptance scenario 3)
 
 **Checkpoint**: All 6 user stories should be independently testable
 
@@ -273,21 +277,21 @@
 
 **Purpose**: Verification, security hardening, backup/restore, and cross-cutting concerns
 
-- [ ] T124 [BE] Implement backup job in `apps/scheduler/src/jobs/`: `pg_dump --single-transaction --format=custom` → AES-256-GCM encrypt → S3 upload via `@aws-sdk/client-s3` per FR-035, FR-036, FR-037. `--single-transaction` ensures atomic snapshot consistency at scale envelope.
-- [ ] T125 [BE] Implement restore command in `apps/cli/src/commands/`: download from S3 → decrypt → `pg_restore` to fresh instance per FR-039, SC-011
-- [ ] T126 [OPS] Schedule backup via BullMQ in `apps/scheduler/`: default every 6 hours, configurable per FR-035
-- [ ] T127 [BE] Add backup status endpoint: last success timestamp, last attempt, last error per FR-038
-- [ ] T128 [FE] Add backup configuration UI: S3 settings, schedule, manual trigger, status display per FR-038
-- [ ] T129 [BE] Add backup status MCP resource: `undevops://backup-status` per FR-038
-- [ ] T130 [E2E] Integration test: configure backup → trigger → verify S3 upload → restore to fresh instance < 30 min (SC-011, SC-013)
-- [ ] T131 [E2E] Regression: all Wave 1 + Wave 2 tests pass after Wave 3 changes
-- [ ] T132 [E2E] Load test at scale envelope: 50 servers, 500 projects, 30 replicas, 30-day retention — verify no non-linear degradation (SC-012)
-- [ ] T133 [SEC] Security audit: verify no secret values in MCP responses, AI reviewer payloads, audit log free-text, application logs (SC-008)
-- [ ] T134 [SEC] Security audit: verify Apache 2.0 attribution in all distributed artifacts (SC-007)
-- [ ] T135 [E2E] Verify cross-platform dev: build + test on Windows, macOS, Linux from single documented procedure (SC-009)
-- [ ] T135a [OPS] Implement deployment log rotation: compress (gzip) + upload to S3 after deployment finishes; delete local file after 24h grace; update deployment.logUri to S3 path; MCP logs endpoint fetches from S3 if local missing. BullMQ scheduled job for cleanup. (scale envelope: controller disk stays under 50GB at 30-day sustained load)
-- [ ] T135b [BE] Implement audit-log tamper-evidence: REVOKE UPDATE/DELETE on audit_log from application role; add hash chain column (SHA-256 of previous row hash + own data); periodic integrity-scan job verifies chain; alert admin on break
-- [ ] T136 [OPS] Run quickstart.md validation: follow guide end-to-end on fresh VPS, verify < 15 min (SC-001)
+- [X] T124 [BE] Implement backup job in `apps/scheduler/src/jobs/`: `pg_dump --single-transaction --format=custom` → AES-256-GCM encrypt → S3 upload via `@aws-sdk/client-s3` per FR-035, FR-036, FR-037. `--single-transaction` ensures atomic snapshot consistency at scale envelope.
+- [X] T125 [BE] Implement restore command in `apps/cli/src/commands/`: download from S3 → decrypt → `pg_restore` to fresh instance per FR-039, SC-011
+- [X] T126 [OPS] Schedule backup via BullMQ in `apps/scheduler/`: default every 6 hours, configurable per FR-035
+- [X] T127 [BE] Add backup status endpoint: last success timestamp, last attempt, last error per FR-038
+- [X] T128 [FE] Add backup configuration UI: S3 settings, schedule, manual trigger, status display per FR-038
+- [X] T129 [BE] Add backup status MCP resource: `undevops://backup-status` per FR-038
+- [X] T130 [E2E] Integration test: configure backup → trigger → verify S3 upload → restore to fresh instance < 30 min (SC-011, SC-013)
+- [X] T131 [E2E] Regression: all Wave 1 + Wave 2 tests pass after Wave 3 changes
+- [X] T132 [E2E] Load test at scale envelope: 50 servers, 500 projects, 30 replicas, 30-day retention — verify no non-linear degradation (SC-012)
+- [X] T133 [SEC] Security audit: verify no secret values in MCP responses, AI reviewer payloads, audit log free-text, application logs (SC-008)
+- [X] T134 [SEC] Security audit: verify Apache 2.0 attribution in all distributed artifacts (SC-007)
+- [X] T135 [E2E] Verify cross-platform dev: build + test on Windows, macOS, Linux from single documented procedure (SC-009)
+- [X] T135a [OPS] Implement deployment log rotation: compress (gzip) + upload to S3 after deployment finishes; delete local file after 24h grace; update deployment.logUri to S3 path; MCP logs endpoint fetches from S3 if local missing. BullMQ scheduled job for cleanup. (scale envelope: controller disk stays under 50GB at 30-day sustained load)
+- [X] T135b [BE] Implement audit-log tamper-evidence: REVOKE UPDATE/DELETE on audit_log from application role; add hash chain column (SHA-256 of previous row hash + own data); periodic integrity-scan job verifies chain; alert admin on break
+- [X] T136 [OPS] Run quickstart.md validation: follow guide end-to-end on fresh VPS, verify < 15 min (SC-001)
 
 ---
 

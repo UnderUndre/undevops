@@ -988,6 +988,98 @@ export default class SlackNotifyPlugin implements UndevopsPlugin {
 
 ---
 
+## External API Consumer Pattern
+
+### When to Use
+
+Use this pattern when an external self-hosted service exposes its own control plane API (HTTP, gRPC, or similar) and undevops merely needs to **consume** that API — displaying status, triggering actions, and surfacing data — without replicating the service's functionality inside the undevops process.
+
+This contrasts with plugins that primarily react to undevops lifecycle hooks (deploy, server-add, etc.). An External API Consumer plugin **initiates outbound calls** to the external service's API and presents results within the undevops UI. The canonical example is a network-tunneling service like [unet](../../../unet/) that has its own peer management, ingress routing, and tunnel status surface.
+
+### Plugin Responsibilities
+
+1. **API client wiring**: Implement a typed HTTP/gRPC client targeting the external service's API. Configuration (base URL, auth token) is stored in plugin settings (with `secret: true` for credentials). The plugin instantiates its client on `onLoad` or lazily on first use.
+
+2. **Auth credential storage via undevops secrets**: API tokens, client certificates, or any credentials required by the external service MUST be declared as `secret: true` settings in the manifest. This ensures they are encrypted at rest (FR-008) and never appear in logs, MCP responses, or audit trails.
+
+3. **UI surface registration**: The plugin registers a status panel and/or action buttons in the undevops UI surface allocated to it. At minimum:
+   - A **status panel** showing the health of the connection to the external service and a summary of its key resources (e.g., connected peers count, active tunnels).
+   - **Action buttons** for common operations (e.g., "Add Peer", "Create Route") that map to the external service's API endpoints.
+
+   UI registration details (component type, position, refresh interval) are declared in the manifest or via a runtime registration call. [NEEDS CLARIFICATION: exact UI registration mechanism — slot-based, route-based, or iframe-based — is TBD at plan time.]
+
+4. **Error handling and degraded mode**: If the external service is unreachable, the plugin MUST:
+   - Surface a clear degraded-status indicator in the UI panel (not silently fail).
+   - Continue to handle undevops lifecycle hooks normally — do not cascade failures into the deployment pipeline.
+   - Retry with exponential backoff (configurable via `config.retryOnError` / `config.maxRetries`).
+   - Log the outage via `PluginContext.logger` with structured error metadata.
+
+5. **Data freshness**: The plugin is responsible for caching and periodically refreshing data from the external API. Recommended: cache with a configurable TTL (default 30s), with manual refresh on user action. Do not re-query on every UI render.
+
+### Plugin MUST NOT
+
+- **Replicate the external service's data model.** The plugin stores only lightweight cache/metadata (e.g., peer count, last-known status). Authoritative state lives in the external service's own storage.
+- **Bypass the external service's API** to touch its internals directly (SSH into its host, read its config files, manipulate its database). All interaction goes through the documented API contract.
+- **Embed the external service's source code.** The plugin is a consumer, not a fork. If the external service needs to be co-deployed, that is an infrastructure concern outside the plugin's scope.
+- **Block undevops lifecycle hooks** on external service availability. Pre-deploy hooks MAY consult the external API (e.g., verify tunnel health before deploying), but MUST handle timeouts gracefully and not veto deployments solely because the external service is slow.
+
+### Manifest Example (External API Consumer)
+
+```json
+{
+  "name": "unet-tunnel-manager",
+  "version": "0.1.0",
+  "description": "Manage unet peers, ingress routes, and tunnel status from the undevops dashboard",
+  "author": "underundre",
+  "license": "MIT",
+  "sdkVersion": "^0.1.0",
+  "hooks": [
+    { "name": "pre-deploy", "priority": 90 },
+    { "name": "post-deploy", "priority": 90 }
+  ],
+  "permissions": ["network:read", "network:write"],
+  "config": {
+    "timeoutMs": 10000,
+    "retryOnError": true,
+    "maxRetries": 2
+  },
+  "settings": [
+    {
+      "key": "UNET_API_URL",
+      "label": "unet Control Plane URL",
+      "type": "string",
+      "required": true,
+      "default": "https://unet.example.com:8443"
+    },
+    {
+      "key": "UNET_API_TOKEN",
+      "label": "unet API Token",
+      "type": "string",
+      "required": true,
+      "secret": true
+    },
+    {
+      "key": "CACHE_TTL_SECONDS",
+      "label": "Status cache TTL (seconds)",
+      "type": "number",
+      "required": false,
+      "default": 30
+    }
+  ]
+}
+```
+
+### Reference Implementation
+
+The **unet** tunnel manager plugin serves as the reference implementation of this pattern. unet is a self-hosted ngrok/Tailscale alternative built on AmneziaWG + Caddy, with its own Go daemon exposing a local management API. The forthcoming remote control plane API (`specs/002-api-control-plane/`) will provide the network-accessible surface that the undevops plugin consumes.
+
+**unet repository**: `C:\Repositories\underundre\underhelpers\unet`
+**unet control plane API spec**: `specs/002-api-control-plane/spec.md` (in development)
+
+The plugin will surface: peers list, ingress routes, tunnel status per peer, and allow creating/revoking peers and routes from within the undevops dashboard.
+
+---
+
 ## Database Schema
 
 ### `plugin` table

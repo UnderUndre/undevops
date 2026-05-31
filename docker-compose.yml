@@ -1,0 +1,122 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-undevops}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-undevops}
+      POSTGRES_DB: ${POSTGRES_DB:-undevops}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-undevops}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-undevops}:${POSTGRES_PASSWORD:-undevops}@postgres:5432/${POSTGRES_DB:-undevops}
+      REDIS_URL: redis://redis:6379
+      NODE_ENV: production
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      UNDEVOPS_ENCRYPTION_KEY: ${UNDEVOPS_ENCRYPTION_KEY}
+      UNDEVOPS_BACKUP_ENCRYPTION_KEY: ${UNDEVOPS_BACKUP_ENCRYPTION_KEY:-}
+      UNDEVOPS_DOMAIN: ${UNDEVOPS_DOMAIN:-localhost}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    restart: unless-stopped
+    ports:
+      - "3002:3000"
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-undevops}:${POSTGRES_PASSWORD:-undevops}@postgres:5432/${POSTGRES_DB:-undevops}
+      REDIS_URL: redis://redis:6379
+      NODE_ENV: dev
+      UNDEVOPS_ENCRYPTION_KEY: ${UNDEVOPS_ENCRYPTION_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile.schedule
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-undevops}:${POSTGRES_PASSWORD:-undevops}@postgres:5432/${POSTGRES_DB:-undevops}
+      REDIS_URL: redis://redis:6379
+      NODE_ENV: dev
+      UNDEVOPS_ENCRYPTION_KEY: ${UNDEVOPS_ENCRYPTION_KEY}
+      UNDEVOPS_BACKUP_ENCRYPTION_KEY: ${UNDEVOPS_BACKUP_ENCRYPTION_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  mcp-server:
+    build:
+      context: .
+      dockerfile: apps/mcp-server/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3003:3003"
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-undevops}:${POSTGRES_PASSWORD:-undevops}@postgres:5432/${POSTGRES_DB:-undevops}
+      REDIS_URL: redis://redis:6379
+      NODE_ENV: dev
+      UNDEVOPS_ENCRYPTION_KEY: ${UNDEVOPS_ENCRYPTION_KEY}
+      MCP_SSE_PORT: "3003"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  monitoring:
+    build:
+      context: .
+      dockerfile: Dockerfile.monitoring
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: "3001"
+      METRICS_CONFIG: ${METRICS_CONFIG}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+volumes:
+  postgres_data:
+  redis_data:

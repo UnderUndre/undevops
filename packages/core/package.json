@@ -1,0 +1,22 @@
+{
+  "name": "@undevops/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "rimraf dist && tsc && tsc-alias",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@undevops/server": "workspace:*",
+    "@undevops/ai-pack": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0",
+    "rimraf": "^6.0.0",
+    "tsc-alias": "^1.8.0"
+  }
+}

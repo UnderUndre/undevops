@@ -18,6 +18,17 @@ export const triggerType = pgEnum("triggerType", ["push", "tag"]);
 
 export const sqldNode = pgEnum("sqldNode", ["primary", "replica"]);
 
+export const actorType = pgEnum("actorType", ["human", "agent", "plugin", "system"]);
+export const gateStatusType = pgEnum("gateStatusType", ["skipped", "pending", "approved", "rejected", "timed_out"]);
+export const gatePolicyType = pgEnum("gatePolicyType", ["disabled", "single", "unanimous", "manual_only"]);
+export const agentActionType = pgEnum("agentActionType", ["deploy", "redeploy", "stop", "start", "restart", "scale", "env_update"]);
+export const pendingActionStatus = pgEnum("pendingActionStatus", ["pending", "approved", "rejected", "expired", "cancelled"]);
+export const mcpAccessLevel = pgEnum("mcpAccessLevel", ["read", "deploy", "admin"]);
+export const mcpTargetType = pgEnum("mcpTargetType", ["organization", "project", "environment", "application", "compose"]);
+export const aiProviderType = pgEnum("aiProviderType", ["claude", "openai", "gemini", "codex", "custom"]);
+export const verdictType = pgEnum("verdictType", ["pass", "fail", "abstain", "error"]);
+export const secretScopeType = pgEnum("secretScopeType", ["organization", "project", "environment", "application", "compose", "ai_reviewer", "plugin"]);
+
 export interface HealthCheckSwarm {
 	Test?: string[] | undefined;
 	Interval?: number | undefined;

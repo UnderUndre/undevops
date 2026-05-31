@@ -1,14 +1,14 @@
-import { db } from "@dokploy/server/db";
+import { db } from "@undevops/server/db";
 import {
 	type apiCreateLibsql,
 	backups,
 	buildAppName,
 	libsql,
-} from "@dokploy/server/db/schema";
-import { generatePassword } from "@dokploy/server/templates";
-import { buildLibsql } from "@dokploy/server/utils/databases/libsql";
-import { pullImage } from "@dokploy/server/utils/docker/utils";
-import { execAsyncRemote } from "@dokploy/server/utils/process/execAsync";
+} from "@undevops/server/db/schema";
+import { generatePassword } from "@undevops/server/templates";
+import { buildLibsql } from "@undevops/server/utils/databases/libsql";
+import { pullImage } from "@undevops/server/utils/docker/utils";
+import { execAsyncRemote } from "@undevops/server/utils/process/execAsync";
 import { TRPCError } from "@trpc/server";
 import { eq, getTableColumns } from "drizzle-orm";
 import type { z } from "zod";

@@ -1,6 +1,6 @@
-import { db } from "@dokploy/server/db";
-import { ai } from "@dokploy/server/db/schema";
-import { selectAIProvider } from "@dokploy/server/utils/ai/select-ai-provider";
+import { db } from "@undevops/server/db";
+import { ai } from "@undevops/server/db/schema";
+import { selectAIProvider } from "@undevops/server/utils/ai/select-ai-provider";
 import { TRPCError } from "@trpc/server";
 import { generateText, Output } from "ai";
 import { desc, eq } from "drizzle-orm";

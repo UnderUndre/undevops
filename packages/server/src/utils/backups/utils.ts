@@ -1,6 +1,6 @@
-import { logger } from "@dokploy/server/lib/logger";
-import type { BackupSchedule } from "@dokploy/server/services/backup";
-import type { Destination } from "@dokploy/server/services/destination";
+import { logger } from "@undevops/server/lib/logger";
+import type { BackupSchedule } from "@undevops/server/services/backup";
+import type { Destination } from "@undevops/server/services/destination";
 import { scheduledJobs, scheduleJob } from "node-schedule";
 import { keepLatestNBackups } from ".";
 import { runComposeBackup } from "./compose";

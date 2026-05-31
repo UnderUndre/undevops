@@ -1,0 +1,19 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"strict": true,
+		"skipLibCheck": true,
+		"outDir": "dist",
+		"jsx": "react-jsx",
+		"declaration": false,
+		"baseUrl": ".",
+		"paths": {
+			"@undevops/server/*": ["../../packages/server/src/*"],
+			"@undevops/core/*": ["../../packages/core/src/*"]
+		}
+	},
+	"exclude": ["node_modules", "dist"],
+	"include": ["src/**/*"]
+}
