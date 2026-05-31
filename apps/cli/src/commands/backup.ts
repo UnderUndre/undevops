@@ -51,6 +51,11 @@ function parseEncryptedPayload(payload: Buffer): {
 	tag: string;
 	encrypted: Buffer;
 } {
+	if (payload.length < IV_LENGTH + AUTH_TAG_LENGTH) {
+		throw new Error(
+			`Corrupted backup payload: expected at least ${IV_LENGTH + AUTH_TAG_LENGTH} bytes (IV + auth tag), got ${payload.length}`,
+		);
+	}
 	const ivBuf = payload.subarray(0, IV_LENGTH);
 	const tagBuf = payload.subarray(payload.length - AUTH_TAG_LENGTH);
 	const encrypted = payload.subarray(IV_LENGTH, payload.length - AUTH_TAG_LENGTH);

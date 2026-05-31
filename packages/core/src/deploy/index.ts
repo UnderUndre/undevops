@@ -56,33 +56,32 @@ export {
   checkGateRequired,
   runReviewGate,
   type GateDecision,
-} from "./review-gate";
+} from "./review-gate.js";
 
 export {
   processAdminOverride,
   type OverrideRequest,
   type OverrideResult,
-} from "./admin-override";
+} from "./admin-override.js";
 
 export {
   identifyRescheduleCandidates,
   drainNodeAndReschedule,
   type RescheduleAction,
-} from "./replica-rescheduler";
+} from "./replica-rescheduler.js";
 
 export {
   calculatePlacement,
   buildSpreadPlacementPreference,
   scheduleReplicasForApplication,
-} from "./replica-scheduler";
+} from "./replica-scheduler.js";
 
 export {
   getLogContent,
   type S3Config,
-} from "./log-store";
+} from "./log-store.js";
 
 export {
   tailFile,
   type TailedLines,
-} from "./tail";
-
+} from "./tail.js";

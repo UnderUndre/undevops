@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { ReviewRequest, Verdict } from "../types/reviewer";
+import type { ReviewRequest, Verdict } from "../types/reviewer.js";
 
 const VerdictSchema = z.object({
   verdict: z.enum(["pass", "fail"]),

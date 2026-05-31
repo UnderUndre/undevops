@@ -1,4 +1,4 @@
-import type { AIReviewerProvider, ReviewRequest, ReviewVerdict, Verdict } from "../types/reviewer";
+import type { AIReviewerProvider, ReviewRequest, ReviewVerdict, Verdict } from "../types/reviewer.js";
 
 const DEFAULT_SYSTEM_PROMPT = `You are a deployment reviewer. Analyze the described change and determine if it is safe to deploy.
 
@@ -19,6 +19,14 @@ interface ClaudeConfig {
   timeoutSeconds?: number;
   systemPrompt?: string;
   temperature?: number;
+}
+
+interface ClaudeResponse {
+  content?: { text: string }[];
+  usage?: {
+    input_tokens?: number;
+    output_tokens?: number;
+  };
 }
 
 export class ClaudeReviewer implements AIReviewerProvider {
@@ -78,7 +86,7 @@ export class ClaudeReviewer implements AIReviewerProvider {
         };
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as ClaudeResponse;
       const rawResponse =
         data.content?.map((b: { text: string }) => b.text).join("") ?? "";
 

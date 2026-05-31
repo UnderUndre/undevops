@@ -1,10 +1,10 @@
-import type { AIReviewerProvider, ReviewRequest, ReviewVerdict } from "../types/reviewer";
+import type { AIReviewerProvider, ReviewRequest, ReviewVerdict } from "../types/reviewer.js";
 import {
   buildSystemPrompt,
   buildUserMessage,
   createTimeoutController,
   parseVerdictResponse,
-} from "./review-prompt";
+} from "./review-prompt.js";
 
 export interface OpenAIProviderConfig {
   apiKey: string;
@@ -64,7 +64,7 @@ export class OpenAIProvider implements AIReviewerProvider {
         throw new Error(`OpenAI API error ${response.status}: ${body}`);
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as any;
       const raw = data.choices?.[0]?.message?.content ?? "";
 
       if (!raw) {

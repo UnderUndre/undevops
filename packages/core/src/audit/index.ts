@@ -1,4 +1,4 @@
-export { createActorAudit, type ActorType, type ActorContext, type AuditEventInput } from "./middleware";
+export { createActorAudit, type ActorType, type ActorContext, type AuditEventInput } from "./middleware.js";
 export { createAuditLog, getAuditLogs } from "@undevops/server/services/proprietary/audit-log";
 export type { AuditLog, AuditAction, AuditResourceType } from "@undevops/server/db/schema/audit-log";
 export {
@@ -11,12 +11,12 @@ export {
 	auditRedeploy,
 	auditCancel,
 	auditEnvironmentCreate,
-} from "./operations";
+} from "./operations.js";
 export {
 	computeRowHash,
 	verifyChain,
 	generateIntegrityAlert,
 	type AuditLogRow,
 	type IntegrityAlert,
-} from "./tamper-evidence";
-export { computeAndAttachHash } from "./hash-chain";
+} from "./tamper-evidence.js";
+export { computeAndAttachHash } from "./hash-chain.js";

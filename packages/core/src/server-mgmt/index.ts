@@ -10,4 +10,4 @@ export {
   checkAllNodes,
   type NodeHealthStatus,
   type NodeHealthResult,
-} from "./health-monitor";
+} from "./health-monitor.js";

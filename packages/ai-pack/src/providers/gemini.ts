@@ -1,4 +1,4 @@
-import type { AIReviewerProvider, ReviewRequest, ReviewVerdict, Verdict } from "../types/reviewer";
+import type { AIReviewerProvider, ReviewRequest, ReviewVerdict, Verdict } from "../types/reviewer.js";
 
 const DEFAULT_SYSTEM_PROMPT = `You are a deployment reviewer. Analyze the described change and determine if it is safe to deploy.
 
@@ -19,6 +19,18 @@ interface GeminiConfig {
   timeoutSeconds?: number;
   systemPrompt?: string;
   temperature?: number;
+}
+
+interface GeminiResponse {
+  candidates?: {
+    content?: {
+      parts?: { text: string }[];
+    };
+  }[];
+  usageMetadata?: {
+    promptTokenCount?: number;
+    candidatesTokenCount?: number;
+  };
 }
 
 export class GeminiReviewer implements AIReviewerProvider {
@@ -79,7 +91,7 @@ export class GeminiReviewer implements AIReviewerProvider {
         };
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as GeminiResponse;
       const rawResponse =
         data.candidates?.[0]?.content?.parts?.map((p: { text: string }) => p.text).join("") ?? "";
 

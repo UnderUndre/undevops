@@ -31,9 +31,21 @@ async function uploadToS3(localGzPath: string, s3Key: string, destination: any):
 	const { execFile } = await import("node:child_process");
 	const { promisify } = await import("node:util");
 	const execAsync = promisify(execFile);
-	const rcloneFlags = getS3Credentials(destination).map(flag => flag.replace(/="([^"]*)"$/, '=$1'));
-	const rcloneDest = `:s3:${destination.bucket}/${s3Key}`;
-	await execAsync("rclone", ["copyto", ...rcloneFlags, localGzPath, rcloneDest]);
+	
+	const { accessKey, secretAccessKey, region, endpoint, bucket } = destination;
+	const env = {
+		...process.env,
+		RCLONE_CONFIG_S3_TYPE: "s3",
+		RCLONE_CONFIG_S3_PROVIDER: destination.provider || "Other",
+		RCLONE_CONFIG_S3_ACCESS_KEY_ID: accessKey,
+		RCLONE_CONFIG_S3_SECRET_ACCESS_KEY: secretAccessKey,
+		RCLONE_CONFIG_S3_REGION: region,
+		RCLONE_CONFIG_S3_ENDPOINT: endpoint,
+		RCLONE_CONFIG_S3_FORCE_PATH_STYLE: "true",
+	};
+
+	const rcloneDest = `:s3:${bucket}/${s3Key}`;
+	await execAsync("rclone", ["copyto", localGzPath, rcloneDest], { env });
 }
 
 export async function rotateDeploymentLogs(): Promise<RotationResult> {
@@ -65,12 +77,13 @@ export async function rotateDeploymentLogs(): Promise<RotationResult> {
 			continue;
 		}
 
-		if (status === "running") {
+		// Skip if deployment is still running or hasn't finished yet
+		if (status === "running" || !finishedAt) {
 			continue;
 		}
 
-		const finishedTime = finishedAt ? new Date(finishedAt).getTime() : 0;
-		if (finishedTime > 0 && finishedTime > Date.now() - GRACE_PERIOD_MS) {
+		const finishedTime = new Date(finishedAt).getTime();
+		if (finishedTime > Date.now() - GRACE_PERIOD_MS) {
 			continue;
 		}
 

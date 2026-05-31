@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { db, eq } from "@undevops/server/db";
+import { db, eq, and } from "@undevops/server/db";
 import { applications } from "@undevops/server/db/schema/application";
 import { pendingAgentActions } from "@undevops/server/db/schema/pending-agent-action";
 import { nanoid } from "nanoid";
@@ -27,7 +27,10 @@ async function handleScale(input: Record<string, unknown>, ctx: ToolContext): Pr
 		.select({ actionId: pendingAgentActions.actionId })
 		.from(pendingAgentActions)
 		.where(
-			eq(pendingAgentActions.targetId, app.applicationId),
+			and(
+				eq(pendingAgentActions.targetId, app.applicationId),
+				eq(pendingAgentActions.status, "pending"),
+			),
 		)
 		.limit(1);
 

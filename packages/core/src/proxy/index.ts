@@ -22,4 +22,4 @@ export {
   verifyTraefikSwarmConfig,
   ensureOverlayNetwork,
   type TraefikLBConfig,
-} from "./multi-node-lb";
+} from "./multi-node-lb.js";
