@@ -26,6 +26,8 @@ This spec is deliberately **scope-bounded to the transport and its mapping onto 
 - Q: How are Telegram users linked to undevops admin identities? → **Decision: opt-in binding via the web UI.** An admin generates a one-time binding code in the web UI and sends it to the bot (`/bind <code>`). The mapping (Telegram user id ↔ undevops admin id) is stored encrypted. No OAuth, no Telegram Login Widget required for v0.x — simpler, fewer moving parts, and Telegram Login Widget is optional hardening for a later wave.
 - Q: Mini App — full Next.js port or a focused subset? → **Decision: focused subset for v0.x.** Deploy list, pending-approvals queue, project health, recent logs. Full project configuration (env vars, volumes, domains) stays in the web UI. Rationale: mobile context rewards glanceable status + approve/rollback; detailed editing rewards a desktop surface.
 - Q: TON/Stars payments — in scope? → **Decision: out of scope for this spec.** Monetization is a commercial-layer concern (see undevops README open-core boundary). A future `003-billing` spec would cover it. This spec must build *without* assuming any payment integration.
+- Q: Does enabling two-way alerts replace or supplement the inherited one-way Dokploy notification? → **Decision: replace, for bound admins.** When two-way alerts are enabled for a project, a bound admin with scope receives a single actionable alert — the two-way message supersedes the legacy one-way Dokploy ping for that admin. Notification targets that are not bound admins (legacy Dokploy targets) keep receiving the one-way notification unchanged. No bound admin is double-notified for the same deploy event. (See FR-005.)
+- Q: Share the Telegram transport with unet/007-telegram-vessel (near-identical bot/Mini App/relay plumbing)? → **Decision: DEFERRED — treated as a separate strategic question.** For v0.x this spec proceeds independently (no shared package). A potential separate "TG-first" project may later absorb the common transport; revisit before extracting shared code across repos.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -108,6 +110,7 @@ As an admin, I link my Telegram account to my undevops identity once, so that al
 - **Mini App opened on Telegram Desktop vs mobile**: Layout must be responsive; Desktop must not render a broken mobile-only layout. Tested on at least Telegram iOS, Android, and Desktop.
 - **Large diff in a pending-approval alert**: Telegram message size limits apply. Diffs over N lines are summarized ("+312 / −89 across 14 files — tap to open") with a link to the full diff in the web UI.
 - **Rate-limiting from Telegram's Bot API** under a burst of deploys: Bot coalesces notifications for the same project within a short window and degrades gracefully (silent coalescing, never lost audit events).
+- **Project with both bound admins and legacy Dokploy notification targets**: On a deploy event, bound admins receive only the two-way actionable alert (the one-way ping is suppressed for them); legacy targets still receive the one-way Dokploy notification. No bound admin sees two messages for the same event (FR-005).
 - **Admin taps an action button, then taps a contradicting one before the first completes** (Approve → Rollback): Second tap is rejected while the first is in-flight; the bot surfaces "Action in progress, please wait" and updates once the first completes.
 - **Unbound user sends `/approve <deployId>` out of band**: Rejected — actions only flow through inline buttons the bot itself rendered, never via free-text commands referencing an id the user observed elsewhere.
 
@@ -124,7 +127,7 @@ As an admin, I link my Telegram account to my undevops identity once, so that al
 **Two-Way Deploy Alerts (P1 — US1)**
 
 - **FR-004**: When a deploy enters the human-approval queue (multi-AI FAIL/ABSENT, or any policy requiring approval), the bot MUST post an alert to every bound admin with scope on the project, containing: project name, branch/commit, AI verdicts (verdict + reviewer id, secrets redacted), and inline keyboard buttons for the applicable actions (e.g. `[Approve] [Reject…]`).
-- **FR-005**: When a deploy completes (success or failure) and the project is configured for deploy notifications, the bot MUST post a status message with a link to the deploy timeline in the web UI. This generalizes the inherited one-way Dokploy notification for the two-way surface.
+- **FR-005**: When a deploy completes (success or failure) and the project is configured for deploy notifications, the bot MUST post a status message with a link to the deploy timeline in the web UI. For a bound admin with scope, this two-way message REPLACES the inherited one-way Dokploy notification — the admin receives one alert, not a duplicate. Notification targets that are not bound admins continue to receive the legacy one-way Dokploy notification unchanged. No bound admin is double-notified for the same deploy event.
 - **FR-006**: Inline-button callbacks MUST be HMAC-signed over `(message_id, action, deploy_id, expires_at)` with a server-held key. Callbacks whose signature does not validate, whose `expires_at` has passed, or whose `message_id` was not originated by the bot MUST be rejected. Replay across distinct messages MUST be impossible.
 - **FR-007**: The bot MUST handle the "action already taken by another channel" case gracefully: if a deploy was approved via the web UI while a Telegram alert is still visible, tapping that alert's buttons MUST reply "Already actioned via <channel>" with no side effects.
 
@@ -178,6 +181,7 @@ As an admin, I link my Telegram account to my undevops identity once, so that al
 - **Localization of bot/Mini-App UI** — English only for v0.x, matching the 001-init scope.
 - **Voice / media-based commands** — text and inline buttons only.
 - **Bot marketplace publication** — the bot is private to each undevops instance; not a public Telegram-directory listing.
+- **Shared Telegram-transport library with unet/007-telegram-vessel** — the two products' Telegram layers are built independently for v0.x; factoring a common package is a deferred strategic decision (see Clarifications).
 
 ## Success Criteria *(mandatory)*
 
