@@ -1,71 +1,82 @@
-# Feature Specification: 003-undrlla-one-click-deploy (undevops 1-Click Provisioner)
+# Feature Specification: 003-undrlla-one-click-deploy
 
-**Feature Branch**: `003-undrlla-one-click-deploy`
-**Created**: 2026-07-19
-**Status**: Approved / In Specification
-**Input**: Implement an automated 1-click deployment pipeline in `undevops` PaaS for client marketplace instances (`undrlla-core`). Upon receiving a provision payload from `undrlla` (via REST API or MCP gateway), `undevops` spawns an isolated per-tenant Directus container, applies `schema.snapshot.yaml`, writes `@underundre/undesign` theme tokens into the tenant configuration, deploys the `undrllanding` storefront, and configures Traefik reverse proxy routing with automatic Let's Encrypt TLS certificate issuance.
-
----
-
-## Executive Context & Architecture
-
-`undevops` acts as the PaaS orchestration engine for the Undrlla ecosystem.
-
-### Provisioning Pipeline
-
-1. **Trigger & Authorization**:
-   - `undrlla` triggers `/api/v1/deploy/marketplace` (authenticated via HMAC token).
-   - Payload: `{ tenant_id, domain, admin_email, undesign_theme, custom_colors }`.
-
-2. **Container Orchestration (Docker / Traefik)**:
-   - **Directus Service Container**: Spawns an isolated `directus/directus:12.1.1` instance with dedicated PostgreSQL database schema.
-   - **Schema Migration**: Executes `npx directus schema apply ./schema.snapshot.yaml` to initialize core collections and RLS/FLS security policies.
-   - **Branding Injection**: Populates `branding_settings` collection with design tokens derived from `@underundre/undesign`.
-   - **Storefront Container (`undrllanding`)**: Spawns Next.js storefront container with `DIRECTUS_URL` and `TENANT_ID` env vars.
-   - **Ingress & SSL (Traefik)**: Registers host router rules in Traefik with ACME Let's Encrypt automatic TLS issuance.
+**Feature Branch**: `003-undrlla-one-click-deploy`  
+**Created**: 2026-07-19  
+**Updated**: 2026-07-28 (Fully aligned with Medusa 2.0 + Postgres + Redis + Paddle deploy)  
+**Status**: Draft — Active  
+**Input**: One-click deploy of isolated client shops from `undrlla` provisioning portal into `undevops` PaaS.
 
 ---
 
-## User Scenarios & Acceptance Criteria *(mandatory)*
+## Executive Context
 
-### User Story 1 — 1-Click Client Marketplace Provisioning (Priority: P1)
+`undevops` is the PaaS that **executes** marketplace provisioning.  
+**Source of truth for the request body** is `undrlla` feature `002-provisioning-portal`: the **`ProvisioningManifest` JSON**. This feature MUST NOT invent a parallel thin payload.
 
-As an operator or automated billing hook, I want `undevops` to accept a deployment request and fully bootstrap a client marketplace instance in under 60 seconds, so that new clients get an instant live storefront with SSL.
+Cross-link: `repos/undrlla/specs/002-provisioning-portal/spec.md`, `repos/undrlla/specs/ECOSYSTEM.md` (Q7 locked).
 
-**Acceptance Scenarios**:
+### Pipeline
 
-1. **Given** a valid HMAC-signed provision request payload, **When** `POST /api/v1/deploy/marketplace` is invoked, **Then** `undevops` launches the isolated Directus and Next.js containers, applies `schema.snapshot.yaml`, and returns HTTP 201 Created with service health URLs.
-2. **Given** Traefik router configuration, **When** HTTP traffic hits `https://zernyoshko.undrlla.com`, **Then** Traefik terminates TLS using a valid Let's Encrypt certificate and proxies traffic to the storefront container.
+1. **Ingest**: `undrlla` (or operator) POSTs a validated `ProvisioningManifest` to `undevops` with HMAC auth (+ timestamp/nonce anti-replay).
+2. **Job**: async job `pending → provisioning → ready | failed | rolled_back`.
+3. **Orchestrate (Medusa 2.0 Stack)**:
+   - Isolated **Medusa 2.0 template-shop** (`undreseller`) container.
+   - Dedicated PostgreSQL database container / schema per tenant.
+   - Shared/Isolated Redis cache instance.
+   - Deploy `undrllanding` storefront container with env (`MEDUSA_BACKEND_URL`, `TENANT_MODE=client`, `FEATURES=shop`, Paddle public token).
+   - Traefik routing + ACME TLS certificate issuance.
+4. **Secrets**: resolve only `secret:<provider>/<key>` refs from `undevops` secret store; never accept raw secrets in manifest.
+5. **Callback**: webhook/poll status to `undrlla` portal (`002` FR-008).
 
 ---
 
-### User Story 2 — Directus Schema Application & Branding Injection (Priority: P2)
+## Clarifications
 
-As a tenant administrator, I want my provisioned instance to automatically receive the standard `undrlla-core` schema and my custom `@underundre/undesign` brand palette without manual DB configuration.
+- Q: Which payload? → **A: undrlla `ProvisioningManifest` only.** Deprecated: ad-hoc `{ tenant_id, domain, admin_email, undesign_theme }`.
+- Q: HMAC? → Shared secret; request MUST include timestamp + nonce; reject skew > 5 minutes or replayed nonce.
+- Q: Failure mid-bootstrap? → Job → `failed`; cleanup worker removes partial containers/routes/DB; optional `rolled_back`.
+- Q: DNS not ready? → Job may sit `awaiting_dns` with retries; not infinite silent fail.
+- Q: Day-2 (upgrade/suspend/destroy)? → **Out of scope for 003**; tracked as future `undevops` feature; do not claim in SC.
 
-**Acceptance Scenarios**:
+---
 
-1. **Given** a newly spawned Directus container, **When** the bootstrap runner executes `directus schema apply`, **Then** all 14 core collections and RLS/FLS policies are instantiated without errors.
-2. **Given** `undesign_theme` parameters in the deployment payload, **When** Directus starts, **Then** `branding_settings` contains the exact CSS variables and palette tokens requested.
+## User Stories
+
+### US1 — Ingest manifest and provision (P1)
+**Given** a valid HMAC-signed `ProvisioningManifest`, **When** `POST /api/v1/provisioning/manifests` (or MCP `ingest_provisioning_manifest`), **Then** `undevops` returns `202` + `job_id` and brings up Medusa + Postgres + Redis + Storefront + TLS for `manifest.domain`.
+
+### US2 — Medusa DB Migration + Branding (P2)
+**Given** provision job, **When** Medusa container starts, **Then** `medusa db:migrate` runs automatically and initial tenant configuration/theme matches manifest addons.
+
+### US3 — Status to undrlla (P2)
+**Given** job state changes, **When** polled or webhook, **Then** `undrlla` portal sees `queued|provisioning|ready|failed|awaiting_dns|rolled_back`.
 
 ---
 
 ## Functional Requirements
 
-- **FR-001**: System MUST provide an authenticated API endpoint (`POST /api/v1/deploy/marketplace`) and MCP tool `deploy_marketplace`.
-- **FR-002**: System MUST validate HMAC request signatures using a shared secret between `undrlla` and `undevops`.
-- **FR-003**: System MUST execute container creation and schema application asynchronously with job status polling (`GET /api/v1/deploy/jobs/:id`).
-- **FR-004**: System MUST apply `schema.snapshot.yaml` via Directus CLI migration runner on startup.
-- **FR-005**: System MUST configure Traefik HTTP router and ACME TLS certificate solver for tenant custom domains and subdomains.
-- **FR-006**: System MUST record deployment logs in S3-compatible backup and observability store.
+- **FR-001**: MUST accept **only** `ProvisioningManifest` (schema compatible with `undrlla` `002`, including `list_on_hub`, `share_catalog_to_hub`, `secrets` as refs, `initial_admin_email`, `domain`, `display_name`, `addons`).
+- **FR-002**: MUST authenticate with HMAC shared secret + timestamp + nonce anti-replay.
+- **FR-003**: MUST run provision asynchronously; expose `GET /api/v1/provisioning/jobs/:id`.
+- **FR-004**: MUST run `medusa db:migrate` and seed initial store settings for new tenant Postgres DB.
+- **FR-005**: MUST configure Traefik router + ACME for domain (custom or platform subdomain). Before requesting ACME TLS certificate, system MUST perform an active DNS A/CNAME lookup check; if DNS does not resolve to the cluster ingress IP, job MUST transition to `awaiting_dns` and retry with backoff, preventing Let's Encrypt ACME rate-limit (429) exhaustion.
+- **FR-006**: MUST deploy `undrllanding` image with `MEDUSA_BACKEND_URL`, Paddle client token, and feature flags for Wave-1 shop.
+- **FR-007**: MUST resolve secret refs from `undevops` store; fail closed if missing.
+- **FR-008**: MUST log deploy artifacts to S3-compatible storage.
+- **FR-009**: MUST cleanup partial resources on failure.
+- **FR-010**: MCP tool MUST wrap the same ingest path (same authz).
+- **FR-011**: Day-2 lifecycle (upgrade Medusa, suspend, destroy) is **OUT OF SCOPE**; document as future work.
+- **FR-012**: Provisioned client storefronts and admin portals MUST be configured to integrate with **Undrlla IdP (`id.undrlla.network`)** for federated SSO (RS256 JWT validation over JWKS) per `undrlla/specs/005-sso-jwt-contract.md`.
 
 ---
 
 ## Success Criteria
 
-- **SC-001**: Total end-to-end deployment time from payload ingestion to live TLS HTTPS endpoint is under 60 seconds.
-- **SC-002**: 100% of provisioned client instances pass schema integrity checks and RLS policy verification.
-- **SC-003**: Zero manual shell commands required from operators during standard client onboarding.
+- **SC-001**: Warm-path provision (images cached) reaches healthy HTTPS storefront within **10 minutes** p95 (align `undrlla` `002` SC-001).
+- **SC-002**: 100% of `ready` jobs pass Medusa healthcheck (`/health`) and Store API status.
+- **SC-003**: Zero manual shell for standard onboarding when DNS is preconfigured.
+- **SC-004**: Contract test: sample `undrlla` `002` manifest fixture accepted end-to-end.
 
 ---
+
 *End of Specification.*
