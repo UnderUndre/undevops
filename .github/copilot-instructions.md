@@ -192,7 +192,7 @@ npx clai-helpers sync
 npx clai-helpers status --strict
 
 # Fresh install in consumer repo
-npx clai-helpers init --source github:UnderUndre/ai
+npx clai-helpers init --source github:UnderUndre/underoute-clai
 ```
 
 ### Release (CLI versioning)
