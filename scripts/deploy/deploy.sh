@@ -273,6 +273,18 @@ if [[ -z "$REMOTE_SCRIPT" ]] && [[ -n "$APP_SUBDIR" ]]; then
 fi
 
 if [[ -z "$REMOTE_SCRIPT" ]]; then
+    # 3. Fallback: deploy a foreign repo that has no scripts/ of its own —
+    #    upload THIS repo's universal server-deploy.sh to the target app dir.
+    if [[ -z "$REMOTE_SCRIPT" ]] && [[ -f "$REPO_ROOT/scripts/deploy/server-deploy.sh" ]]; then
+        step "No server-deploy.sh in remote repo — uploading universal script from undevops"
+        ssh "$PROD_SSH_HOST" "mkdir -p '$WORK_DIR/scripts/deploy'"
+        scp "$REPO_ROOT/scripts/deploy/server-deploy.sh" "$PROD_SSH_HOST:$WORK_DIR/scripts/deploy/server-deploy.sh" 2>&1
+        REMOTE_SCRIPT="$WORK_DIR/scripts/deploy/server-deploy.sh"
+        log "Universal server-deploy.sh uploaded"
+    fi
+fi
+
+if [[ -z "$REMOTE_SCRIPT" ]]; then
     error "No server-deploy.sh found in $REMOTE_APP_DIR/scripts/deploy/ or $WORK_DIR/scripts/"
     exit 1
 fi
