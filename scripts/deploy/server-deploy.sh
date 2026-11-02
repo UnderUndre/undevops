@@ -74,6 +74,65 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+# ── Git Auth Preflight (deploy-key hygiene) ─────
+# The server pulls/clones from git@ SSH remotes using ITS OWN key — a misconfigured
+# key surface surfaces as a cryptic "Permission denied (publickey)" 3 minutes into
+# a build. Preflight it: fix the classic 0644-private-key trap (ssh silently ignores
+# such keys), optionally wire DEPLOY_SSH_KEY into ~/.ssh/config, then probe the host
+# with BatchMode (no TTY prompts — this script runs detached via nohup).
+ensure_git_auth() {
+    local repo_url="$1"
+    [[ "$repo_url" != git@* ]] && return 0   # HTTPS/public clone — nothing to probe
+
+    local host="${repo_url#git@}"
+    host="${host%%:*}"
+
+    mkdir -p "$HOME/.ssh"
+    chmod 700 "$HOME/.ssh"
+
+    if [[ -n "${DEPLOY_SSH_KEY:-}" ]]; then
+        if [[ ! -f "$DEPLOY_SSH_KEY" ]]; then
+            echo "❌ DEPLOY_SSH_KEY is set but the file does not exist: $DEPLOY_SSH_KEY"
+            exit 1
+        fi
+        chmod 600 "$DEPLOY_SSH_KEY"
+        if ! grep -qs "IdentityFile $DEPLOY_SSH_KEY" "$HOME/.ssh/config" 2>/dev/null; then
+            printf '\nHost %s\n  IdentityFile %s\n  IdentitiesOnly yes\n' "$host" "$DEPLOY_SSH_KEY" >> "$HOME/.ssh/config"
+            echo "🔑 Wired $DEPLOY_SSH_KEY into ~/.ssh/config for $host"
+        fi
+    else
+        # No explicit key: repair the classic "UNPROTECTED PRIVATE KEY FILE" trap —
+        # ssh ignores group/world-readable private keys with zero explanation.
+        local fixed=0 k
+        for k in "$HOME/.ssh"/id_* "$HOME/.ssh/underundre"* "$HOME/.ssh"/*deploy*; do
+            [[ -f "$k" ]] || continue
+            [[ "$k" == *.pub || "$k" == *.config || "$k" == *known_hosts* ]] && continue
+            if [[ "$(stat -c %a "$k" 2>/dev/null)" != "600" ]]; then
+                chmod 600 "$k"
+                echo "🔑 Fixed permissions on $k (was $(stat -c %a "$k" 2>/dev/null) → 600)"
+                fixed=1
+            fi
+        done
+    fi
+
+    echo "🔐 Probing git auth: ssh -T git@$host"
+    local probe
+    probe=$(ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new -T "git@$host" 2>&1 || true)
+    if echo "$probe" | grep -q "successfully authenticated"; then
+        echo "✅ Git SSH auth OK: $(echo "$probe" | head -1)"
+    else
+        echo "❌ Git SSH auth FAILED for git@$host"
+        echo "$probe" | sed 's/^/   /'
+        echo ""
+        echo "Fix (on this server):"
+        echo "  1. Generate:  ssh-keygen -t ed25519 -f ~/.ssh/<name> -N \"\""
+        echo "  2. Add ~/.ssh/<name>.pub to GitHub → repo Settings → Deploy keys (read-only)"
+        echo "  3. Point to it:  export DEPLOY_SSH_KEY=~/.ssh/<name>   # or wire ~/.ssh/config"
+        echo "  4. Verify:    ssh -T git@$host"
+        exit 1
+    fi
+}
+
 # ── Resolve Paths ───────────────────────────────
 
 if [[ -z "$APP_DIR" ]]; then
@@ -150,6 +209,7 @@ if [[ ! -d "$APP_DIR" ]]; then
         #     (the SSH user must have repo-read access via deploy key or SSH agent).
         #   - HTTPS URL with $SECRET_PAT in env → inject for clone, strip after.
         #   - HTTPS URL without PAT → public clone only.
+        ensure_git_auth "$REPO_URL"
         if [[ "$REPO_URL" == https://* ]] && [[ -n "${SECRET_PAT:-}" ]]; then
             AUTH_URL="https://oauth2:${SECRET_PAT}@${REPO_URL#https://}"
             # trap ensures PAT is stripped from .git/config even if clone fails
@@ -341,6 +401,8 @@ send_telegram "🔄 *${PROJECT_NAME} Deploy Started*
 📅 $(date)"
 
 # ── 1. Pull latest code ────────────────────────
+
+ensure_git_auth "$(git -C "$REPO_DIR" remote get-url origin 2>/dev/null || echo "$REPO_URL")"
 
 echo ""
 echo "📥 Pulling latest code..."
