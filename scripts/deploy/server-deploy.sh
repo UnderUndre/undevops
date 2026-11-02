@@ -418,7 +418,7 @@ if [[ -n "$(git status --porcelain)" ]]; then
     git -c safe.directory='*' stash push \
         -m "deploy-$(date +%Y%m%d-%H%M%S)" \
         --include-untracked \
-        -- ':!docker-compose.dashboard.yml' || true
+        -- ':!docker-compose.dashboard.yml' ':!deploy.log' || true
 fi
 
 # Branch: --branch wins over current HEAD. This is the UI-selected branch —
