@@ -26,6 +26,12 @@
 set -euo pipefail
 
 ADMIN_URL="http://127.0.0.1:2019"
+# Caddy never exports .admin via GET /config/ (admin endpoint returns null), so
+# it cannot be "preserved" from a fetch — it must be SET explicitly on every
+# /load, or Caddy resets it to the default in-container 127.0.0.1 and the
+# host-level access (published -p 127.0.0.1:2019:2019) dies. Override with
+# CADDY_ADMIN_LISTEN if the container layout differs.
+ADMIN_LISTEN="${CADDY_ADMIN_LISTEN:-0.0.0.0:2019}"
 SERVER_ID="srv0"
 NAME=""
 UPSTREAM=""
@@ -73,11 +79,12 @@ fi
 
 # ── --remove: drop route by @id ──────────────────────────────────────────
 if [[ -n "$REMOVE_NAME" ]]; then
-    NEW_CONFIG=$(jq --arg id "$REMOVE_NAME" '
+    NEW_CONFIG=$(jq --arg id "$REMOVE_NAME" --arg adminListen "$ADMIN_LISTEN" '
       (.apps.http.servers // {}) | to_entries | map(
         .value.routes = ((.value.routes // []) | map(select((.["@id"] // "") != $id)))
       ) | from_entries | . as $servers |
       .apps.http.servers = $servers
+    | .admin = { "listen": $adminListen }
     ' /tmp/caddy-config.$$.json)
     echo "$NEW_CONFIG" | curl -fsS -X POST "$ADMIN_URL/load" \
         -H "Content-Type: application/json" -d @- >/dev/null
@@ -113,6 +120,7 @@ NEW_CONFIG=$(jq \
     --arg sid "$SERVER_ID" \
     --argjson route "$ROUTE" \
     --argjson hosts "$HOSTS_JSON" \
+    --arg adminListen "$ADMIN_LISTEN" \
     '
     (.apps.http.servers // {}) as $existing |
     ($existing[$sid] // { "listen": [":443"], "routes": [] }) as $srv |
@@ -123,10 +131,11 @@ NEW_CONFIG=$(jq \
           | [ $rh[] | select(. as $h | $hosts | index($h)) ] | length == 0 )
       )
     ] as $kept |
-    # mutate the fetched config in place — PRESERVES .admin (loopback contract
-    # FR-028) and any other top-level sections; rebuilding {apps:{http:...}}
-    # from scratch resets admin to defaults and kills host-level API access.
+    # mutate the fetched config in place and SET .admin explicitly — the admin
+    # API never exports its own section, so anything not set here resets to
+    # in-container 127.0.0.1 and kills host-level access (see ADMIN_LISTEN).
     .apps.http.servers = ( $existing + { ($sid): ($srv + { routes: ($kept + [$route]) }) } )
+    | .admin = { "listen": $adminListen }
     ' /tmp/caddy-config.$$.json)
 
 # Sanity: config must parse and contain our route
@@ -152,7 +161,9 @@ fi
 # dies on the next caddy restart (runtime-only registration).
 PERSIST_PATH="${CADDY_CONFIG_PATH:-/var/lib/caddy-config/caddy.json}"
 if [[ -w "$PERSIST_PATH" ]] || [[ -w "$(dirname "$PERSIST_PATH")" ]]; then
-    curl -fsS "$ADMIN_URL/config/" > "$PERSIST_PATH" 2>/dev/null         && echo "  Config persisted: $PERSIST_PATH (restart-safe)"         || echo "  ⚠ Could not persist config to $PERSIST_PATH — route is runtime-only"
+    curl -fsS "$ADMIN_URL/config/" | jq --arg a "$ADMIN_LISTEN" '.admin = {listen: $a}' > "$PERSIST_PATH" 2>/dev/null \
+        && echo "  Config persisted: $PERSIST_PATH (restart-safe)" \
+        || echo "  ⚠ Could not persist config to $PERSIST_PATH — route is runtime-only"
 fi
 
 echo "✓ Site registered: ${DOMAINS[*]} → $UPSTREAM (route @id: $NAME)"
