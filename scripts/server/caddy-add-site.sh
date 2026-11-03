@@ -76,7 +76,8 @@ if [[ -n "$REMOVE_NAME" ]]; then
     NEW_CONFIG=$(jq --arg id "$REMOVE_NAME" '
       (.apps.http.servers // {}) | to_entries | map(
         .value.routes = ((.value.routes // []) | map(select((.["@id"] // "") != $id)))
-      ) | from_entries | . as $servers | {apps: {"http": {"servers": $servers}}}
+      ) | from_entries | . as $servers |
+      .apps.http.servers = $servers
     ' /tmp/caddy-config.$$.json)
     echo "$NEW_CONFIG" | curl -fsS -X POST "$ADMIN_URL/load" \
         -H "Content-Type: application/json" -d @- >/dev/null
@@ -122,7 +123,10 @@ NEW_CONFIG=$(jq \
           | [ $rh[] | select(. as $h | $hosts | index($h)) ] | length == 0 )
       )
     ] as $kept |
-    { apps: { http: { servers: ( $existing + { ($sid): ($srv + { routes: ($kept + [$route]) }) } ) } } }
+    # mutate the fetched config in place — PRESERVES .admin (loopback contract
+    # FR-028) and any other top-level sections; rebuilding {apps:{http:...}}
+    # from scratch resets admin to defaults and kills host-level API access.
+    .apps.http.servers = ( $existing + { ($sid): ($srv + { routes: ($kept + [$route]) }) } )
     ' /tmp/caddy-config.$$.json)
 
 # Sanity: config must parse and contain our route
@@ -142,6 +146,13 @@ if [[ "$RESP" != "200" ]]; then
     echo "✖ Caddy rejected config (HTTP $RESP) — old config still active"
     rm -f /tmp/caddy-config.$$.json
     exit 1
+fi
+
+# Persist the running config to the base config file — otherwise the route
+# dies on the next caddy restart (runtime-only registration).
+PERSIST_PATH="${CADDY_CONFIG_PATH:-/var/lib/caddy-config/caddy.json}"
+if [[ -w "$PERSIST_PATH" ]] || [[ -w "$(dirname "$PERSIST_PATH")" ]]; then
+    curl -fsS "$ADMIN_URL/config/" > "$PERSIST_PATH" 2>/dev/null         && echo "  Config persisted: $PERSIST_PATH (restart-safe)"         || echo "  ⚠ Could not persist config to $PERSIST_PATH — route is runtime-only"
 fi
 
 echo "✓ Site registered: ${DOMAINS[*]} → $UPSTREAM (route @id: $NAME)"
