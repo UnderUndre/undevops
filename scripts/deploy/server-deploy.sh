@@ -661,6 +661,11 @@ if [[ "$SKIP_CLEANUP" != "true" ]]; then
     echo ""
     echo "🧹 Post-deploy cleanup..."
     docker image prune -f 2>/dev/null || true
+    # Build cache is NOT touched by image prune — on a small VPS it grows
+    # ~0.5-1 GB per deploy until the disk hits 100% (incident 2026-11-04:
+    # umami-db crashed with "No space left on device", 15.8 GB cache).
+    # Keep the most recent 2 GB so the next build reuses warm layers.
+    docker builder prune -af --keep-storage 2gb 2>/dev/null || true
 fi
 
 # ── Done ────────────────────────────────────────
